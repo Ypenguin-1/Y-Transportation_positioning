@@ -171,7 +171,7 @@ const REFRESH_INTERVAL_MS = 30000;
 /** 多言語辞書(JP/EN) */
 const I18N = {
   ja: {
-    siteTitle: "列車位置情報サイト(開発中)",
+    siteTitle: "列車位置情報サイト",
     disclaimer: "時刻による位置の予測です。実際の位置情報とは異なる可能性があるためご注意ください。",
     backToList: "路線一覧",
     selectRouteHeading: "路線を選択してください",
@@ -205,7 +205,7 @@ const I18N = {
     junctionBothToast: "鹿児島駅前～天文館通は2系統との共用区間、この先は分岐区間です。2系統は現在準備中です。",
   },
   en: {
-    siteTitle: "Train Position Info (in development)",
+    siteTitle: "Train Position Info",
     disclaimer: "This is a prediction based on the timetable. The actual position may differ, so please use this information with caution.",
     backToList: "Route list",
     selectRouteHeading: "Please select a route",
