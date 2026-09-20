@@ -3,156 +3,125 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>列車位置アプリ</title>
+  <title>列車位置情報サイト(開発中)</title>
 
   <!--バージョン確認--><!--JSはbodyの最後！-->
-  <link rel="stylesheet", href="train_positioning_ver1.css"> 
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <!--フォント読み込み-->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!--アイコン-->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  
+  <link rel="stylesheet" href="train_positioning_ver1.css">
 
+  <!--フォント読み込み(Noto Sans JP)-->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+  <!--アイコン(絵文字は使わずFont Awesomeを使用)-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 
 <body>
-    <div class="positioning_system">
-        <!--ヘッダ-->
-        <div class="train_header">
-            <div class="page_top">
-                <i class="fa-solid fa-train"></i>
-                列車位置情報サイト(開発中)
-            </div>
+  <div class="positioning_system" id="app">
 
-            <div class="top_attention">
-            
-                <div class="top_attention_text">
-                 <i class="fa-solid fa-triangle-exclamation"></i>
-                    時刻による位置の予測です。実際の位置情報とは異なる可能性があるためご注意ください。
-                </div>
-            </div>
-        </div>
-         
-        <!--ボディ-->
-        <div class="train_body">
-            <!--方向(上)-->
-            <div class="map_direction_up">
-             <div class="map_direction_box">
-                品川・東京 <span class="houmen">方面</span>
-             </div>
-            </div>
-            
+    <!--ヘッダ-->
+    <header class="train_header" id="trainHeader">
+      <div class="page_top">
+        <!--路線詳細画面でのみ表示する「路線一覧へ戻る」ボタン-->
+        <button type="button" id="backButton" class="header_btn back_btn is-hidden">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span data-i18n="backToList">路線一覧</span>
+        </button>
 
-            <!--駅表示(始点用)-->
-            <div class="station_area Top_station_area">
-                <div class="station_area_top Top_station_area_top"></div>
-
-                <div class="station_center">
-                    <div class="station_name">東京</div>
-                    <div class="station_point_out">
-                        <div class="station_point_in"></div>
-                    </div>
-                </div>
-
-                <div class="station_area_bottom Top_station_area_bottom">
-                    <div class="boder"></div>
-                </div>
-            </div>
-            <!--区間-->
-            <div class="segment">
-                <div class="boder"></div>
-                <div class="segment_top"></div>
-                <div class="segment_bottom"></div>
-
-            </div>
-
-            <!--駅表示-->
-            <div class="station_area">
-                <div class="station_area_top">
-                    <div class="boder"></div>
-                </div>
-
-                <div class="station_center">
-                    <div class="station_name">高輪ゲートウェイ</div>
-                    <div class="station_point_out">
-                        <div class="station_point_in"></div>
-                    </div>
-                </div>
-
-                <div class="station_area_bottom">
-                    <div class="boder"></div>
-                </div>
-            </div>
-            <!--区間-->
-            <div class="segment">
-                <div class="boder"></div>
-                <div class="segment_top"></div>
-                <div class="segment_bottom"></div>
-
-            </div>
-
-            <!--駅表示-->
-            <div class="station_area">
-                <div class="station_area_top">
-                    <div class="boder"></div>
-                </div>
-
-                <div class="station_center">
-                    <div class="station_name">相生</div>
-                    <div class="station_point_out">
-                        <div class="station_point_in"></div>
-                    </div>
-                </div>
-
-                <div class="station_area_bottom">
-                    <div class="boder"></div>
-                </div>
-            </div>
-            <!--区間-->
-            <div class="segment">
-                <div class="boder"></div>
-                <div class="segment_top"></div>
-                <div class="segment_bottom"></div>
-
-            </div>
-
-            <!--駅表示-->
-            <div class="station_area">
-                <div class="station_area_top">
-                    <div class="boder"></div>
-                </div>
-
-                <div class="station_center">
-                    <div class="station_name">長崎</div>
-                    <div class="station_point_out">
-                        <div class="station_point_in"></div>
-                    </div>
-                </div>
-
-                <div class="station_area_bottom">
-                </div>
-            </div>
-
+        <div class="page_top_title">
+          <i class="fa-solid fa-train-tram"></i>
+          <span data-i18n="siteTitle">列車位置情報サイト(開発中)</span>
         </div>
 
-         <!--方向(下)-->
-            <div class="map_direction_down">
-             <div class="map_direction_box">
-                鹿児島中央 <span class="houmen">方面</span>
-             </div>
-            </div>
-
-        <!--アウト-->
-        <div class="train_outline">
-
-
+        <div class="page_top_actions">
+          <!--言語切替(JP/EN)-->
+          <button type="button" id="langButton" class="header_btn lang_btn" aria-label="Switch language / 言語切替">
+            <span id="langButtonLabel">EN</span>
+          </button>
+          <!--ライト/ダークモード切替(auto→light→darkの順で循環)-->
+          <button type="button" id="themeButton" class="header_btn theme_btn" aria-label="Switch theme / 配色切替">
+            <i class="fa-solid fa-circle-half-stroke" id="themeButtonIcon"></i>
+          </button>
         </div>
+      </div>
+
+      <!--注意書き(必須表示):時刻による位置予測である旨の注意-->
+      <div class="top_attention">
+        <div class="top_attention_text">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span data-i18n="disclaimer">時刻による位置の予測です。実際の位置情報とは異なる可能性があるためご注意ください。</span>
+        </div>
+      </div>
+
+      <!--時刻/運行日操作パネル(路線詳細画面でのみ表示)-->
+      <div class="control_panel is-hidden" id="controlPanel">
+        <div class="control_group">
+          <label for="dayTypeSelect" data-i18n="dayTypeLabel">運行日</label>
+          <select id="dayTypeSelect">
+            <option value="weekday" data-i18n="dayWeekday">平日</option>
+            <option value="Saturday" data-i18n="daySaturday">土曜</option>
+            <option value="Holiday" data-i18n="dayHoliday">日曜・祝日</option>
+          </select>
+        </div>
+        <div class="control_group">
+          <label for="timeInput" data-i18n="timeLabel">時刻</label>
+          <input type="time" id="timeInput" step="60">
+        </div>
+        <button type="button" id="nowButton" class="header_btn now_btn">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span data-i18n="nowButton">現在時刻に戻す</span>
+        </button>
+      </div>
+    </header>
+
+    <!--メインコンテンツ-->
+    <main class="main_content" id="mainContent">
+
+      <!--画面1: 路線選択画面-->
+      <section class="view view_select" id="viewSelect">
+        <h1 class="select_heading" data-i18n="selectRouteHeading">路線を選択してください</h1>
+        <div class="route_card_list" id="routeCardList"><!-- JSで生成 --></div>
+      </section>
+
+      <!--画面2: 路線詳細画面(1系統)-->
+      <section class="view view_line is-hidden" id="viewLine">
+        <!--上り方向(鹿児島駅前方面)の固定ラベル-->
+        <div class="map_direction map_direction_up">
+          <div class="map_direction_box">
+            <i class="fa-solid fa-caret-up"></i>
+            <span id="directionUpLabel"></span>
+          </div>
+        </div>
+
+        <!--路線図本体(JSで駅・区間要素を動的生成)-->
+        <div class="train_body" id="trainBody"></div>
+
+        <!--下り方向(谷山方面)の固定ラベル-->
+        <div class="map_direction map_direction_down">
+          <div class="map_direction_box">
+            <i class="fa-solid fa-caret-down"></i>
+            <span id="directionDownLabel"></span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!--列車情報モーダル(列車アイコンタップで表示)-->
+    <div class="modal_overlay is-hidden" id="trainModal">
+      <div class="modal_box" role="dialog" aria-modal="true">
+        <button type="button" class="modal_close" id="modalCloseButton" aria-label="Close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="modal_body" id="modalBody"><!-- JSで生成 --></div>
+      </div>
     </div>
-    
-    <!--JS-->
-    <script src="train_positioning_system_js_ver1.js"></script>
 
+    <!--簡易トースト通知(準備中メッセージ等)-->
+    <div class="toast is-hidden" id="toast"></div>
+  </div>
+
+  <!--JS-->
+  <script src="train_positioning_system_js_ver1.js"></script>
 </body>
 </html>
