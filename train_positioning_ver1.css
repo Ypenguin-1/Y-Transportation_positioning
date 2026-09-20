@@ -32,6 +32,7 @@
   --line1-color:#1F3DFF;
   --line2-color:#FF362E;
   --no-line-color:#EDEDED;
+  --arrived-color:#FF8A00; /* 到着済み(停車中)の駅を示すオレンジ */
 
   /* 駅・区間ブロックの高さ(JS側の座標計算と必ず一致させること) */
   --station-top-h:45px;
@@ -360,12 +361,6 @@ button{
   gap:6px;
 }
 
-.station_name_en{
-  font-size:11px;
-  font-weight:400;
-  color:var(--muted-text);
-}
-
 /* 分岐/共用区間バッジ(2系統との共用区間などを示す) */
 .station_junction_btn{
   border:none;
@@ -426,12 +421,34 @@ button{
   background:var(--route-color);
   left:50%;
   transform:translateX(-50%);
-  width:5px;
+  width:8px;
+  z-index:2;
 }
 
 .segment .boder{ top:0; height:100%; }
 .station_area_top .boder{ top:-2px; bottom:-2px; height:calc(100% + 2px); }
 .station_area_bottom .boder{ top:-2px; bottom:-2px; height:calc(100% + 2px); }
+
+/* 2系統との共用区間: 1系統の青線の下に、2系統色(赤)の線を少し太く重ねて「2本の線」に見せる。
+   ::beforeはDOM上つねに実際の子要素(.boder)より先に来るため、特別な指定なしで赤が下・青が上になる。 */
+.segment--overlap,
+.station_area_top--overlap,
+.station_area_bottom--overlap{ position:relative; }
+
+.segment--overlap::before,
+.station_area_top--overlap::before,
+.station_area_bottom--overlap::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  width:14px;
+  background:var(--line2-color);
+  z-index:1;
+}
+.segment--overlap::before{ top:0; height:100%; }
+.station_area_top--overlap::before{ top:-2px; bottom:-2px; height:calc(100% + 2px); }
+.station_area_bottom--overlap::before{ top:-2px; bottom:-2px; height:calc(100% + 2px); }
 
 /* ---------------------------------------------------------
    5. 列車アイコン(位置予測マーカー)
@@ -439,50 +456,49 @@ button{
 .train_marker{
   position:absolute;
   transform:translate(-50%,-50%);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
   z-index:50;
   cursor:pointer;
 }
 
-.train_marker_icon{
+/* アイコン自体を系統色に着色する(背景の丸は使わない)。translateで中心に合わせるのはこの要素だけ。 */
+.train_marker_icon_wrap{
   position:relative;
-  width:30px;
-  height:30px;
-  border-radius:50%;
-  background:var(--marker-color,#888);
-  color:#fff;
+  width:28px;
+  height:28px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:14px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.5);
-  border:2px solid var(--bg-color);
 }
 
+.train_marker_icon{
+  font-size:24px;
+  color:var(--marker-color,#888);
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5));
+}
+
+/* 系統番号はアイコン中央に重ねて表示(背景なし、文字色は背景色の反転色) */
 .train_marker_badge{
   position:absolute;
-  bottom:-4px;
-  right:-4px;
-  min-width:14px;
-  height:14px;
-  padding:0 2px;
-  border-radius:7px;
-  background:var(--bg-color);
-  color:var(--marker-color,#888);
+  top:52%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  font-family:"Arial","Helvetica Neue",Arial,sans-serif;
   font-size:10px;
-  font-weight:900;
-  line-height:14px;
-  text-align:center;
-  border:1px solid var(--marker-color,#888);
+  font-weight:800;
+  color:var(--marker-badge-color,#fff);
+  pointer-events:none;
 }
 
-.train_marker_direction{
-  font-size:11px;
+/* 上り(▲)はアイコンの上、下り(▼)はアイコンの下に表示する */
+.train_marker_caret{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:12px;
   color:var(--marker-color,#888);
-  margin-top:1px;
 }
+.train_marker_caret.is-up{ top:-13px; }
+.train_marker_caret.is-down{ bottom:-13px; }
 
 /* ---------------------------------------------------------
    6. モーダル / トースト
@@ -534,11 +550,14 @@ button{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  min-width:28px;
-  height:28px;
-  border-radius:50%;
+  min-width:30px;
+  height:30px;
+  padding:0 4px;
+  border-radius:6px;
   color:#fff;
-  font-weight:900;
+  font-family:"Arial","Helvetica Neue",Arial,sans-serif;
+  font-weight:800;
+  font-size:16px;
   background:var(--modal-line-color,#888);
 }
 
@@ -552,6 +571,11 @@ button{
 }
 
 .modal_row span:first-child{ color:var(--muted-text); }
+
+.modal_row--current{
+  font-weight:700;
+}
+.modal_row--current span:last-child{ color:var(--arrived-color); }
 
 .modal_station_list{
   margin-top:10px;
@@ -569,10 +593,17 @@ button{
   border-bottom:1px solid var(--card-border);
 }
 .modal_station_row:last-child{ border-bottom:none; }
+
+/* 通過済みの駅は文字を薄く、現在停車中の駅はオレンジで強調する */
+.modal_station_row.is-passed{
+  color:var(--muted-text);
+}
 .modal_station_row.is-current{
-  background:var(--btn-bg);
+  background:rgba(255,138,0,0.15);
+  color:var(--arrived-color);
   font-weight:700;
 }
+.modal_station_row.is-current span{ color:var(--arrived-color); }
 
 .toast{
   position:fixed;
