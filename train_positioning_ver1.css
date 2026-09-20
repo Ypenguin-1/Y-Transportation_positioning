@@ -436,11 +436,19 @@ button{
 .station_area_top .boder{ top:-2px; bottom:-2px; height:calc(100% + 2px); }
 .station_area_bottom .boder{ top:-2px; bottom:-2px; height:calc(100% + 2px); }
 
-/* 2系統との共用区間: 1系統の青線の下に、2系統色(赤)の線を少し太く重ねて「2本の線」に見せる。
-   ::beforeはDOM上つねに実際の子要素(.boder)より先に来るため、特別な指定なしで赤が下・青が上になる。 */
+/* 2系統との共用区間(鹿児島駅前～天文館通): 1本の線を左右で色分けし、
+   向かって左半分を1系統色(青)、右半分を2系統色(赤)にすることで「2本の線」に見せる。 */
 .segment--overlap,
 .station_area_top--overlap,
 .station_area_bottom--overlap{ position:relative; }
+
+.segment--overlap .boder,
+.station_area_top--overlap .boder,
+.station_area_bottom--overlap .boder{
+  left:calc(50% - 4px);
+  width:4px;
+  transform:none;
+}
 
 .segment--overlap::before,
 .station_area_top--overlap::before,
@@ -448,14 +456,36 @@ button{
   content:"";
   position:absolute;
   left:50%;
-  transform:translateX(-50%);
-  width:14px;
+  width:4px;
   background:var(--line2-color);
-  z-index:1;
+  z-index:2;
 }
 .segment--overlap::before{ top:0; height:100%; }
 .station_area_top--overlap::before{ top:-2px; bottom:-2px; height:calc(100% + 2px); }
 .station_area_bottom--overlap::before{ top:-2px; bottom:-2px; height:calc(100% + 2px); }
+
+/* 分岐点(天文館通～高見馬場、郡元～郡元(南側)): 青線はそのまま直進させ、
+   その先で2系統色(赤)の線を右へ分岐させて描く。 */
+.branch_indicator{
+  position:absolute;
+  top:0;
+  left:50%;
+  z-index:3;
+  pointer-events:none;
+  overflow:visible;
+}
+.branch_indicator_line{
+  fill:none;
+  stroke:var(--line2-color);
+  stroke-width:6;
+  stroke-linecap:round;
+}
+.branch_indicator_arrow{ fill:var(--line2-color); }
+.branch_indicator_label{
+  font-size:12px;
+  font-weight:700;
+  fill:var(--line2-color);
+}
 
 /* ---------------------------------------------------------
    5. 列車アイコン(位置予測マーカー)
@@ -485,7 +515,7 @@ button{
 /* 系統番号はアイコン中央に重ねて表示(背景なし、文字色は背景色の反転色) */
 .train_marker_badge{
   position:absolute;
-  top:52%;
+  top:42%;
   left:50%;
   transform:translate(-50%,-50%);
   font-family:"Arial","Helvetica Neue",Arial,sans-serif;
