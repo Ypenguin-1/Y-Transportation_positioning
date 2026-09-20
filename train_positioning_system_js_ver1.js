@@ -50,26 +50,41 @@ const LINE1_STATIONS = [
   { code: "I_25", ja: "谷山",             en: "Tanyama" },
 ];
 
-/** 2系統と線路を共用している区間(隣接駅コードのペア)。
+/** 2系統と線路を共用している区間(鹿児島駅前～天文館通、隣接駅コードのペアで列挙)。
  *  この区間だけ2系統の色(赤)の線を1系統の線(青)の下に重ねて表示する。 */
 const OVERLAP_SEGMENT_PAIRS = [
-  ["I_07", "I_08"], // 天文館通 ～ 高見馬場
-  ["I_16", "I_17"], // 郡元 ～ 郡元(南側)
+  ["I_01", "I_02"], ["I_02", "I_03"], ["I_03", "I_04"], ["I_04", "I_05"], ["I_05", "I_06"], ["I_06", "I_07"],
 ];
 
-/** 共用区間の両端駅コード(「共用区間」バッジを表示する駅) */
-const LINE1_SHARED_WITH_LINE2 = Array.from(new Set(OVERLAP_SEGMENT_PAIRS.flat()));
+/** 共用区間(鹿児島駅前～天文館通)の両端駅コード */
+const DUPLICATE_SECTION_ENDPOINTS = ["I_01", "I_07"];
+
+/** 2系統が分岐する駅コード(天文館通～高見馬場、郡元～郡元(南側))。線の分岐UIは今後対応予定。 */
+const BRANCH_POINT_STATIONS = ["I_07", "I_08", "I_16", "I_17"];
+
+/** 区間情報ボタンを表示する駅コード(共用区間の両端 or 分岐点) */
+const JUNCTION_INFO_STATIONS = Array.from(new Set([...DUPLICATE_SECTION_ENDPOINTS, ...BRANCH_POINT_STATIONS]));
 
 /** 隣接する2駅の組が2系統との共用区間かどうかを判定する */
 function isOverlapSegment(codeA, codeB) {
   return OVERLAP_SEGMENT_PAIRS.some(([a, b]) => (a === codeA && b === codeB) || (a === codeB && b === codeA));
 }
 
+/** 駅コードに応じて「区間情報」ボタンのトースト文言を決定する(共用区間の境界か、分岐点か、その両方か) */
+function getJunctionMessage(code) {
+  const isDuplicateEnd = DUPLICATE_SECTION_ENDPOINTS.includes(code);
+  const isBranch = BRANCH_POINT_STATIONS.includes(code);
+  if (isDuplicateEnd && isBranch) return t("junctionBothToast");
+  if (isDuplicateEnd) return t("junctionDuplicateToast");
+  if (isBranch) return t("junctionBranchToast");
+  return null;
+}
+
 /** 路線メタ情報。色は仕様書指定の値、Line_Numが空欄の列車は NO_LINE_COLOR で表示する。 */
 const ROUTES = {
   1: {
     id: 1,
-    color: "#1F3DFF",
+    color: "#124CDE",
     nameJa: "1系統", nameEn: "Line 1",
     fromJa: "鹿児島駅前", fromEn: "Kagoshima-ekimae",
     toJa: "谷山", toEn: "Tanyama",
@@ -94,7 +109,7 @@ const ROUTES = {
   },
 };
 
-const NO_LINE_COLOR = "#EDEDED";
+const NO_LINE_COLOR = "#737373";
 
 /** Vehicle列の値 → Font Awesome アイコンクラス(絵文字は使用しない) */
 const VEHICLE_ICON_CLASS = {
@@ -152,22 +167,20 @@ const I18N = {
     nowButton: "現在時刻に戻す",
     comingSoonTag: "準備中",
     comingSoonToast: "この路線は現在準備中です。",
-    sharedNote: "天文館通～高見馬場、郡元～郡元(南側)は1・2系統の共用区間です",
+    sharedNote: "鹿児島駅前～天文館通は1・2系統の共用区間、天文館通～高見馬場、郡元～郡元(南側)は分岐区間です",
     viewRoute: "この路線を見る",
     modalType: "種別",
     modalLine: "系統",
     modalDestination: "行き先",
     modalDeparture: "出発",
-    modalCurrentPosition: "現在位置",
-    modalCurrentAtStation: (name) => `${name} に停車中`,
-    modalCurrentTraveling: (from, to) => `${from} → ${to} 走行中`,
-    modalCurrentUnknown: "運行時間外です",
     modalStations: "各駅発車時刻",
     typeLocal: "普通",
     directionUp: (name) => `${name} 方面`,
     directionDown: (name) => `${name} 方面`,
-    junctionButtonLabel: "共用区間",
-    junctionToastLine2: "この先は2系統との共用区間です。2系統は現在準備中です。",
+    junctionButtonLabel: "区間情報",
+    junctionDuplicateToast: "鹿児島駅前～天文館通は2系統との共用区間です。2系統は現在準備中です。",
+    junctionBranchToast: "この先は2系統との分岐区間です。2系統は現在準備中です。",
+    junctionBothToast: "鹿児島駅前～天文館通は2系統との共用区間、この先は分岐区間です。2系統は現在準備中です。",
   },
   en: {
     siteTitle: "Train Position Info (in development)",
@@ -182,22 +195,20 @@ const I18N = {
     nowButton: "Reset to now",
     comingSoonTag: "Coming soon",
     comingSoonToast: "This route is currently under development.",
-    sharedNote: "Tenmonkan-dori - Takami-baba and Kogen - Kogen (South) are shared by Line 1 and Line 2",
+    sharedNote: "Kagoshima-ekimae - Tenmonkan-dori is shared with Line 2; Tenmonkan-dori - Takami-baba and Kogen - Kogen (South) are where Line 2 branches off",
     viewRoute: "View this route",
     modalType: "Type",
     modalLine: "Line",
     modalDestination: "Destination",
     modalDeparture: "Departure",
-    modalCurrentPosition: "Current position",
-    modalCurrentAtStation: (name) => `Stopped at ${name}`,
-    modalCurrentTraveling: (from, to) => `Traveling ${from} → ${to}`,
-    modalCurrentUnknown: "Outside service hours",
     modalStations: "Departure times",
     typeLocal: "Local",
     directionUp: (name) => `To ${name}`,
     directionDown: (name) => `To ${name}`,
-    junctionButtonLabel: "Shared section",
-    junctionToastLine2: "Beyond here is shared with Line 2, which is currently under development.",
+    junctionButtonLabel: "Section info",
+    junctionDuplicateToast: "Kagoshima-ekimae - Tenmonkan-dori is shared with Line 2, which is currently under development.",
+    junctionBranchToast: "Beyond here is where Line 2 branches off. Line 2 is currently under development.",
+    junctionBothToast: "Kagoshima-ekimae - Tenmonkan-dori is shared with Line 2, and beyond here is where it branches off. Line 2 is currently under development.",
   },
 };
 
@@ -266,10 +277,10 @@ function contrastTextColor(hex) {
   return luminance > 150 ? "#1a1a1a" : "#ffffff";
 }
 
-/** Line_Num値から表示色を決定する(1系統=青, 2系統=赤, 空欄=グレー) */
+/** Line_Num値から表示色を決定する(1系統=青, 2系統・直通=赤, 空欄=グレー) */
 function colorForLineNum(lineNum) {
   if (lineNum === "1") return ROUTES[1].color;
-  if (lineNum === "2") return ROUTES[2].color;
+  if (lineNum === "2" || lineNum === "直通") return ROUTES[2].color;
   return NO_LINE_COLOR;
 }
 
@@ -416,7 +427,8 @@ function getStopStatus(train, stopIndex, nowSec) {
    6. 座標計算(位置予測)
    ========================================================= */
 
-/** 列車のtimelineを見て、現在時刻における状態("station"/"segment"/null)を正準順の駅インデックスで求める */
+/** 列車のtimelineを見て、現在時刻における状態("station"/"segment"/null)を正準順の駅インデックスで求める。
+ *  駅間を走行中は経過時間の前半/後半を区別せず、常に区間の中央に表示する(発車した駅のゾーンに重ならないように)。 */
 function computeTrainPosition(train, canonicalOrder, nowSec) {
   const idx = (code) => canonicalOrder.indexOf(code);
   const timeline = train.timeline;
@@ -439,16 +451,8 @@ function computeTrainPosition(train, canonicalOrder, nowSec) {
     const canB = idx(toCode);
     if (canA < 0 || canB < 0) return null;
 
-    const span = entry.end - entry.start;
-    const fraction = span > 0 ? (nowSec - entry.start) / span : 1;
-    const goingDown = canA < canB; // 正準順でindexが増える方向=谷山側へ進んでいる
     const segmentIndex = Math.min(canA, canB);
-    // goingDown: 前半(fraction<0.5)は出発駅側(上側)、後半は到着駅側(下側)
-    // goingUp  : 前半は出発駅側(下側=まだ上に進んでいない)、後半は到着駅側(上側)
-    let half;
-    if (goingDown) half = fraction < 0.5 ? "top" : "bottom";
-    else half = fraction < 0.5 ? "bottom" : "top";
-    return { type: "segment", segmentIndex, half, eventTime: train.stops[entry.toIndex].timeSec };
+    return { type: "segment", segmentIndex, eventTime: train.stops[entry.toIndex].timeSec };
   }
   return null;
 }
@@ -475,12 +479,10 @@ function primeCoordinateBaseline(trainBodyEl) {
   return true;
 }
 
-/** 区間(駅と駅の間)の上半分/下半分のY座標を返す */
-function getSegmentAnchorY(segmentIndex, half) {
+/** 区間(駅と駅の間)の中央のY座標を返す(前半/後半の区別はせず、常に区間の中央に表示する) */
+function getSegmentAnchorY(segmentIndex) {
   const anchor = getStationAnchorY(segmentIndex);
-  const yTop = anchor.bottom + LAYOUT.stationCenter + LAYOUT.stationBottom + LAYOUT.segmentTop / 2;
-  const yBottom = anchor.bottom + LAYOUT.stationCenter + LAYOUT.stationBottom + LAYOUT.segmentTop + LAYOUT.segmentBottom / 2;
-  return half === "top" ? yTop : yBottom;
+  return anchor.bottom + LAYOUT.stationCenter + LAYOUT.stationBottom + (LAYOUT.segmentTop + LAYOUT.segmentBottom) / 2;
 }
 
 /** 進行方向によって左右の走行レーンを分ける(上り=左寄り, 下り=右寄り) */
@@ -498,7 +500,7 @@ function positionToCoordinates(position, direction) {
     const y = direction === "up" ? anchor.top : anchor.bottom;
     return { x, y };
   }
-  const y = getSegmentAnchorY(position.segmentIndex, position.half);
+  const y = getSegmentAnchorY(position.segmentIndex);
   return { x, y };
 }
 
@@ -506,13 +508,13 @@ function positionToCoordinates(position, direction) {
 function anchorKey(position, direction) {
   return position.type === "station"
     ? `station-${position.stationIndex}-${direction}`
-    : `segment-${position.segmentIndex}-${position.half}-${direction}`;
+    : `segment-${position.segmentIndex}-${direction}`;
 }
 
-/** 重なり順が2番目以降の列車を、駅/区間の外側方向へ少しずらす(時刻の遅い列車ほど後ろ=外側) */
-function applyStackOffset(coords, position, direction, stackIndex) {
+/** 重なり順が2番目以降の列車を、進行方向に沿って少しずらす(時刻の遅い列車ほど後ろ=外側) */
+function applyStackOffset(coords, direction, stackIndex) {
   if (stackIndex === 0) return coords;
-  const sign = position.type === "station" ? (direction === "up" ? -1 : 1) : position.half === "top" ? -1 : 1;
+  const sign = direction === "up" ? -1 : 1;
   return { x: coords.x, y: coords.y + sign * STACK_OFFSET_PX * stackIndex };
 }
 
@@ -537,13 +539,15 @@ function renderRouteSelect() {
     const sectionText = via ? `${from} ～ (${via}) ～ ${to}` : `${from} ～ ${to}`;
 
     card.innerHTML = `
-      ${!route.implemented ? `<span class="route_card_tag">${t("comingSoonTag")}</span>` : ""}
-      <div class="route_card_head">
-        <span class="route_card_badge">${route.id}</span>
-        <span class="route_card_name">${name}</span>
+      <span class="route_card_badge">${route.id}</span>
+      <div class="route_card_main">
+        <div class="route_card_head">
+          <span class="route_card_name">${name}</span>
+          ${!route.implemented ? `<span class="route_card_tag">${t("comingSoonTag")}</span>` : ""}
+        </div>
+        <div class="route_card_section">${sectionText}</div>
+        ${route.id === 1 ? `<div class="route_card_note">${t("sharedNote")}</div>` : ""}
       </div>
-      <div class="route_card_section">${sectionText}</div>
-      ${route.id === 1 ? `<div class="route_card_note">${t("sharedNote")}</div>` : ""}
       <button type="button" class="route_card_action" data-route-id="${route.id}">${t("viewRoute")}</button>
     `;
     list.appendChild(card);
@@ -578,7 +582,7 @@ function createStationBlock(station, index, opts) {
 
   const center = document.createElement("div");
   center.className = "station_center";
-  const isJunction = LINE1_SHARED_WITH_LINE2.includes(station.code);
+  const isJunction = JUNCTION_INFO_STATIONS.includes(station.code);
   center.innerHTML = `
     <div class="station_name">
       <span>${state.language === "ja" ? station.ja : station.en}</span>
@@ -595,7 +599,10 @@ function createStationBlock(station, index, opts) {
   wrap.appendChild(center);
   wrap.appendChild(bottom);
 
-  center.querySelector(".station_junction_btn")?.addEventListener("click", () => showToast(t("junctionToastLine2")));
+  center.querySelector(".station_junction_btn")?.addEventListener("click", () => {
+    const message = getJunctionMessage(station.code);
+    if (message) showToast(message);
+  });
 
   return wrap;
 }
@@ -630,6 +637,25 @@ function renderLineDiagram() {
   document.getElementById("directionDownLabel").textContent = t("directionDown")(
     state.language === "ja" ? LINE1_STATIONS[LINE1_STATIONS.length - 1].ja : LINE1_STATIONS[LINE1_STATIONS.length - 1].en
   );
+}
+
+/** 先頭駅(鹿児島駅前)/最終駅(谷山)が画面内に見えている間は、それぞれの固定方面表示を隠す(駅名との重なりを防ぐ) */
+function updateDirectionLabelVisibility() {
+  if (state.view !== "line1") return;
+  const areas = document.querySelectorAll(".station_area");
+  if (!areas.length) return;
+
+  const header = document.getElementById("trainHeader");
+  const headerBottom = header.getBoundingClientRect().bottom;
+  const viewportBottom = window.innerHeight;
+
+  const firstRect = areas[0].getBoundingClientRect();
+  const lastRect = areas[areas.length - 1].getBoundingClientRect();
+
+  const upLabel = document.querySelector(".map_direction_up");
+  const downLabel = document.querySelector(".map_direction_down");
+  if (upLabel) upLabel.classList.toggle("is-hidden", firstRect.bottom > headerBottom && firstRect.top < viewportBottom);
+  if (downLabel) downLabel.classList.toggle("is-hidden", lastRect.bottom > headerBottom && lastRect.top < viewportBottom);
 }
 
 /** 列車マーカー1件のDOMを生成する。
@@ -689,7 +715,7 @@ function updateTrainMarkers() {
     group.sort((a, b) => a.position.eventTime - b.position.eventTime);
     group.forEach((item, stackIndex) => {
       const baseCoords = positionToCoordinates(item.position, item.train.direction);
-      const coords = applyStackOffset(baseCoords, item.position, item.train.direction, stackIndex);
+      const coords = applyStackOffset(baseCoords, item.train.direction, stackIndex);
       body.appendChild(createTrainMarkerEl(item.train, coords));
     });
   });
@@ -700,35 +726,19 @@ function updateTrainMarkers() {
    ========================================================= */
 
 /** 列車アイコンタップ時、その列車の詳細(系統・種別・行先・各駅発車時刻)を表示する。
- *  現在停車中/走行中の位置を先頭に要約表示し、各駅時刻一覧では通過済みを薄く、
- *  現在停車中の駅をオレンジで強調したうえで、その行が最初から見えるようスクロールする。 */
+ *  あくまで時刻表からの予測のため「現在位置」を断定表示することはせず、
+ *  各駅時刻一覧では通過済みを薄く、現在停車中の駅をオレンジで強調したうえで、その行が最初から見えるようスクロールする。 */
 function openTrainModal(train) {
   state.activeTrainForModal = train;
   const body = document.getElementById("modalBody");
   const color = colorForLineNum(train.lineNum);
   const typeLabel = train.types === "local" ? t("typeLocal") : (TYPE_LABEL[train.types] || train.types);
-
-  const data = state.trains[1];
   const nowSec = getEffectiveNowSeconds();
-  const position = data ? computeTrainPosition(train, data.canonicalOrder, nowSec) : null;
 
   const stationLabel = (code, fallbackName) => {
     const def = LINE1_STATIONS.find((st) => st.code === code);
     return def ? (state.language === "ja" ? def.ja : def.en) : fallbackName;
   };
-
-  let currentSummary = t("modalCurrentUnknown");
-  if (position && position.type === "station") {
-    currentSummary = t("modalCurrentAtStation")(stationLabel(train.stops[position.stopIndex].code, train.stops[position.stopIndex].name));
-  } else if (position && position.type === "segment") {
-    // segmentのfrom/to停車インデックスをtimelineから逆引き
-    const travelEntry = train.timeline.find((e) => e.type === "travel" && nowSec >= e.start && nowSec < e.end);
-    if (travelEntry) {
-      const fromLabel = stationLabel(train.stops[travelEntry.fromIndex].code, train.stops[travelEntry.fromIndex].name);
-      const toLabel = stationLabel(train.stops[travelEntry.toIndex].code, train.stops[travelEntry.toIndex].name);
-      currentSummary = t("modalCurrentTraveling")(fromLabel, toLabel);
-    }
-  }
 
   const stationRows = train.stops
     .map((s, i) => {
@@ -741,9 +751,8 @@ function openTrainModal(train) {
   body.innerHTML = `
     <div class="modal_title">
       <span class="modal_badge" style="--modal-line-color:${color}">${train.lineNum || "-"}</span>
-      <span>${train.destination}${state.language === "ja" ? " 行" : ""}</span>
+      <span>${train.destination}${state.language === "ja" ? '<span class="modal_title_suffix"> 行</span>' : ""}</span>
     </div>
-    <div class="modal_row modal_row--current"><span>${t("modalCurrentPosition")}</span><span>${currentSummary}</span></div>
     <div class="modal_row"><span>${t("modalLine")}</span><span>${train.lineNum || "-"}</span></div>
     <div class="modal_row"><span>${t("modalType")}</span><span>${typeLabel}</span></div>
     <div class="modal_row"><span>${t("modalDeparture")}</span><span>${train.departure}</span></div>
@@ -800,6 +809,7 @@ function switchView(view) {
 
   if (isLine) {
     renderLineDiagram();
+    requestAnimationFrame(updateDirectionLabelVisibility);
     loadRouteTrains(1).then(() => {
       requestAnimationFrame(() => {
         syncHeaderHeight();
@@ -857,6 +867,7 @@ function toggleLanguage() {
     requestAnimationFrame(() => {
       syncHeaderHeight();
       updateTrainMarkers();
+      updateDirectionLabelVisibility();
     });
   }
   closeTrainModal();
@@ -927,8 +938,13 @@ function initEventListeners() {
   });
   window.addEventListener("resize", () => {
     syncHeaderHeight();
-    if (state.view === "line1") updateTrainMarkers();
+    if (state.view === "line1") {
+      updateTrainMarkers();
+      updateDirectionLabelVisibility();
+    }
   });
+  // スクロールで先頭/最終駅が見えたら、対応する固定方面表示を隠す
+  window.addEventListener("scroll", updateDirectionLabelVisibility, { passive: true });
   // OSの配色設定が変化した場合、"auto"設定中であれば追従する
   window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => {
     if (state.themePreference === "auto") applyTheme();
