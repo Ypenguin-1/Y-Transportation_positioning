@@ -87,7 +87,7 @@ function getJunctionMessage(code) {
 const ROUTES = {
   1: {
     id: 1,
-    color: "#124CDE",
+    color: "#0145BF",
     nameJa: "1系統", nameEn: "Line 1",
     fromJa: "鹿児島駅前", fromEn: "Kagoshima-ekimae",
     toJa: "谷山", toEn: "Tanyama",
@@ -99,7 +99,7 @@ const ROUTES = {
   },
   2: {
     id: 2,
-    color: "#FF362E",
+    color: "#FF2929",
     nameJa: "2系統", nameEn: "Line 2",
     fromJa: "天文館通", fromEn: "Tenmonkan-dori",
     viaJa: "鹿児島中央駅前", viaEn: "Kagoshima-chuo Station",
@@ -112,17 +112,29 @@ const ROUTES = {
   },
 };
 
-const NO_LINE_COLOR = "#737373";
+const NO_LINE_COLOR = "#A6A6A6";
 
-/** Vehicle列の値 → Font Awesome アイコンクラス(絵文字は使用しない) */
-const VEHICLE_ICON_CLASS = {
-  tram: "fa-solid fa-train-tram",
-  train: "fa-solid fa-train",
-  subway: "fa-solid fa-train-subway",
-  bus: "fa-solid fa-bus",
-  highway_bus: "fa-solid fa-bus-simple",
+/** 支給された列車アイコン(SVG)。系統番号ごとに専用ファイルが用意されている。 */
+const ICON_BASE = "icons/kagoshima_city_tram_icon/";
+const ICONS = {
+  blueNum1: `${ICON_BASE}KCT_blue_No1_icon.svg`,
+  blueNonum: `${ICON_BASE}KCT_blue_nonum_icon.svg`,
+  redNum2: `${ICON_BASE}KCT_red_No2_icon.svg`,
+  redNonum: `${ICON_BASE}KCT_red_nonum_icon.svg`,
+  redDirect: `${ICON_BASE}KCT_red_direct_icon.svg`,
+  grayNonum: `${ICON_BASE}KCT_gray_nonum_icon.svg`,
 };
-const DEFAULT_VEHICLE_ICON_CLASS = "fa-solid fa-train-tram";
+
+/** 列車のLine_Numと読み込み元系統から、使用するアイコンSVGのパスを決定する。
+ *  1→青1, 2→赤2, 直通→赤直, それ以外は読み込み元系統の路線カラー(nonum)。
+ *  ただし003ファイル(直通ファイル)内の空欄は常にグレーとする。 */
+function iconPathForTrain(train) {
+  if (train.lineNum === "1") return ICONS.blueNum1;
+  if (train.lineNum === "2") return ICONS.redNum2;
+  if (train.lineNum === "直通") return ICONS.redDirect;
+  if (train.sourceFile === "003") return ICONS.grayNonum;
+  return train.sourceRoute === 2 ? ICONS.redNonum : ICONS.blueNonum;
+}
 
 /** Types列の値 → 種別頭文字(普/快/新/特)。局所線はすべてlocalのため今回は未使用だが拡張用に定義。 */
 const TYPE_LABEL = {
@@ -132,10 +144,11 @@ const TYPE_LABEL = {
   direct: "直",
 };
 
-/** 駅ブロック1つ分の高さ(px)。CSSの --station-*-h / --segment-*-h と必ず一致させること。 */
+/** 駅ブロック1つ分の高さ(px)。CSSの --station-*-h / --segment-*-h と必ず一致させること。
+ *  stationCenterは「駅名」+「乗り換え/時刻表アイコン」の2段構成のため25→46に拡張。 */
 const LAYOUT = {
   stationTop: 45,
-  stationCenter: 25,
+  stationCenter: 46,
   stationBottom: 45,
   segmentTop: 55,
   segmentBottom: 55,
@@ -168,19 +181,24 @@ const I18N = {
     dayHoliday: "日曜・祝日",
     timeLabel: "時刻",
     nowButton: "現在時刻に戻す",
+    playButton: "再生",
+    pauseButton: "停止",
     comingSoonTag: "準備中",
     comingSoonToast: "この路線は現在準備中です。",
     sharedNote: "鹿児島駅前～天文館通は1・2系統の共用区間、天文館通～高見馬場、郡元～郡元(南側)は分岐区間です",
     viewRoute: "この路線を見る",
     modalType: "種別",
-    modalLine: "系統",
-    modalDestination: "行き先",
-    modalDeparture: "出発",
+    modalDestination: "終点",
+    modalDeparture: "始発",
+    modalNote: "備考",
     modalStations: "各駅発車時刻",
     typeLocal: "普通",
     directionUp: (name) => `${name} 方面`,
     directionDown: (name) => `${name} 方面`,
     branchLabel: "2系統",
+    transferLabel: "乗り換え",
+    timetableLabel: "時刻表",
+    featureComingSoonToast: "この機能は準備中です。",
     junctionButtonLabel: "区間情報",
     junctionDuplicateToast: "鹿児島駅前～天文館通は2系統との共用区間です。2系統は現在準備中です。",
     junctionBranchToast: "この先は2系統との分岐区間です。2系統は現在準備中です。",
@@ -197,19 +215,24 @@ const I18N = {
     dayHoliday: "Sunday & Holiday",
     timeLabel: "Time",
     nowButton: "Reset to now",
+    playButton: "Play",
+    pauseButton: "Pause",
     comingSoonTag: "Coming soon",
     comingSoonToast: "This route is currently under development.",
     sharedNote: "Kagoshima-ekimae - Tenmonkan-dori is shared with Line 2; Tenmonkan-dori - Takami-baba and Kogen - Kogen (South) are where Line 2 branches off",
     viewRoute: "View this route",
     modalType: "Type",
-    modalLine: "Line",
-    modalDestination: "Destination",
-    modalDeparture: "Departure",
+    modalDestination: "Terminus",
+    modalDeparture: "Origin",
+    modalNote: "Remarks",
     modalStations: "Departure times",
     typeLocal: "Local",
     directionUp: (name) => `To ${name}`,
     directionDown: (name) => `To ${name}`,
     branchLabel: "Line 2",
+    transferLabel: "Transfer",
+    timetableLabel: "Timetable",
+    featureComingSoonToast: "This feature is currently under development.",
     junctionButtonLabel: "Section info",
     junctionDuplicateToast: "Kagoshima-ekimae - Tenmonkan-dori is shared with Line 2, which is currently under development.",
     junctionBranchToast: "Beyond here is where Line 2 branches off. Line 2 is currently under development.",
@@ -229,6 +252,9 @@ const state = {
   trains: { 1: null },          // 系統ごとの読込済み列車データ(キャッシュ)
   liveTimer: null,
   activeTrainForModal: null,
+  isPlaying: false,             // 手動指定時刻から実時間で進行中かどうか
+  playBase: null,                // { simSec, realMs } 再生開始時点の基準値
+  playTimer: null,
 };
 
 /* =========================================================
@@ -272,21 +298,18 @@ function t(key) {
   return I18N[state.language][key];
 }
 
-/** 背景色(#RRGGBB)の明るさから、視認性の高い文字色(白 or 黒に近い色)を返す = 背景の反転色 */
-function contrastTextColor(hex) {
-  const m = hex.replace("#", "");
-  const r = parseInt(m.substring(0, 2), 16);
-  const g = parseInt(m.substring(2, 4), 16);
-  const b = parseInt(m.substring(4, 6), 16);
-  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-  return luminance > 150 ? "#1a1a1a" : "#ffffff";
-}
-
 /** Line_Num値から表示色を決定する(1系統=青, 2系統・直通=赤, 空欄=グレー) */
 function colorForLineNum(lineNum) {
   if (lineNum === "1") return ROUTES[1].color;
   if (lineNum === "2" || lineNum === "直通") return ROUTES[2].color;
   return NO_LINE_COLOR;
+}
+
+/** 系統番号を全角のゴシック表記に変換する(四角囲みバッジ用。"直通"等はそのまま返す) */
+function toFullWidthLineNum(lineNum) {
+  if (lineNum === "1") return "１";
+  if (lineNum === "2") return "２";
+  return lineNum;
 }
 
 /* =========================================================
@@ -357,8 +380,9 @@ function buildTrainTimeline(stops) {
   return timeline;
 }
 
-/** 解析済みCSVから列車オブジェクトの配列を生成する。stopsは時刻表の並び順=進行方向の順。 */
-function buildTrains(parsed) {
+/** 解析済みCSVから列車オブジェクトの配列を生成する。stopsは時刻表の並び順=進行方向の順。
+ *  sourceRoute: 空欄Line_Num時のアイコン色を決めるための、読み込み元系統番号。 */
+function buildTrains(parsed, sourceRoute) {
   const trains = [];
   for (const cols of parsed.rows) {
     const stops = [];
@@ -381,6 +405,7 @@ function buildTrains(parsed) {
       direction: cols[7],
       date: cols[8],
       note: cols[9] || "",
+      sourceRoute,
       stops,
       timeline: buildTrainTimeline(stops),
     });
@@ -398,7 +423,7 @@ async function loadRouteTrains(routeId) {
   ]);
   const downParsed = parseCSVText(downText);
   const upParsed = parseCSVText(upText);
-  const trains = [...buildTrains(downParsed), ...buildTrains(upParsed)];
+  const trains = [...buildTrains(downParsed, routeId), ...buildTrains(upParsed, routeId)];
   // 下り方向CSVのヘッダ順が「上から下」の正順なので、これを画面表示上の正準順(canonical order)とする
   const canonicalOrder = downParsed.stations.map((s) => s.code);
   state.trains[routeId] = { trains, canonicalOrder };
@@ -409,8 +434,13 @@ async function loadRouteTrains(routeId) {
    5. 運行日・時刻ロジック
    ========================================================= */
 
-/** 表示に使う「現在時刻」を秒で返す。手動指定があればそれを優先する。 */
+/** 表示に使う「現在時刻」を秒で返す。
+ *  再生中は基準時刻+実経過秒数、手動指定があればその固定値、どちらも無ければ実時刻を返す。 */
 function getEffectiveNowSeconds() {
+  if (state.isPlaying && state.playBase) {
+    const elapsedSec = (Date.now() - state.playBase.realMs) / 1000;
+    return state.playBase.simSec + elapsedSec;
+  }
   return state.manualTime !== null ? state.manualTime : nowSecondsReal();
 }
 
@@ -544,7 +574,7 @@ function renderRouteSelect() {
     const sectionText = via ? `${from} ～ (${via}) ～ ${to}` : `${from} ～ ${to}`;
 
     card.innerHTML = `
-      <span class="route_card_badge">${route.id}</span>
+      <span class="route_card_badge">${toFullWidthLineNum(String(route.id))}</span>
       <div class="route_card_main">
         <div class="route_card_head">
           <span class="route_card_name">${name}</span>
@@ -589,9 +619,15 @@ function createStationBlock(station, index, opts) {
   center.className = "station_center";
   const isJunction = JUNCTION_INFO_STATIONS.includes(station.code);
   center.innerHTML = `
-    <div class="station_name">
-      <span>${state.language === "ja" ? station.ja : station.en}</span>
-      ${isJunction ? `<button type="button" class="station_junction_btn" title="${t("junctionButtonLabel")}"><i class="fa-solid fa-code-branch"></i></button>` : ""}
+    <div class="station_text">
+      <div class="station_name">
+        <span>${state.language === "ja" ? station.ja : station.en}</span>
+        ${isJunction ? `<button type="button" class="station_junction_btn" title="${t("junctionButtonLabel")}"><i class="fa-solid fa-code-branch"></i></button>` : ""}
+      </div>
+      <div class="station_links_row">
+        <button type="button" class="station_link_btn" data-link="transfer" title="${t("transferLabel")}"><i class="fa-solid fa-right-left"></i></button>
+        <button type="button" class="station_link_btn" data-link="timetable" title="${t("timetableLabel")}"><i class="fa-regular fa-clock"></i></button>
+      </div>
     </div>
     <div class="station_point_out"><div class="station_point_in"></div></div>
   `;
@@ -608,39 +644,45 @@ function createStationBlock(station, index, opts) {
     const message = getJunctionMessage(station.code);
     if (message) showToast(message);
   });
+  center.querySelectorAll(".station_link_btn").forEach((btn) => {
+    btn.addEventListener("click", () => showToast(t("featureComingSoonToast")));
+  });
 
   return wrap;
 }
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-/** 分岐点を示すSVGを生成する。1系統の青線はそのまま直進させ、その手前から2系統色(赤)の線を
- *  右へカーブさせて分岐させ、矢印とラベルを添える(実際のトラック形状の模式図)。 */
+/** 分岐点のインジケータを生成する。1系統の青線はそのまま直進させ、その左側から2系統色(赤)の
+ *  細い線(共用区間からの続き)が始まり、青の下をくぐって右へカーブし、以降は画面右端近くまで
+ *  まっすぐ伸びる。右端には「2系統」ラベル用の空白を残し、ラベルは2系統ページ(準備中)への
+ *  リンクとしてクリック可能にする。矢印(→)は使用しない。 */
 function createBranchIndicator(label) {
-  const svg = document.createElementNS(SVG_NS, "svg");
-  svg.setAttribute("class", "branch_indicator");
-  svg.setAttribute("viewBox", "0 0 140 80");
-  svg.setAttribute("width", "140");
-  svg.setAttribute("height", "80");
+  const wrap = document.createElement("div");
+  wrap.className = "branch_indicator";
 
+  const curve = document.createElementNS(SVG_NS, "svg");
+  curve.setAttribute("class", "branch_indicator_curve");
+  curve.setAttribute("viewBox", "0 0 40 30");
+  curve.setAttribute("width", "40");
+  curve.setAttribute("height", "30");
   const path = document.createElementNS(SVG_NS, "path");
-  path.setAttribute("class", "branch_indicator_line");
-  path.setAttribute("d", "M0,0 L0,30 Q0,42 14,42 L78,42");
+  path.setAttribute("d", "M6,0 L6,14 Q6,26 22,26 L40,26");
+  curve.appendChild(path);
 
-  const arrow = document.createElementNS(SVG_NS, "polygon");
-  arrow.setAttribute("class", "branch_indicator_arrow");
-  arrow.setAttribute("points", "76,34 94,42 76,50");
+  const bar = document.createElement("div");
+  bar.className = "branch_indicator_bar";
 
-  const text = document.createElementNS(SVG_NS, "text");
-  text.setAttribute("class", "branch_indicator_label");
-  text.setAttribute("x", "98");
-  text.setAttribute("y", "46");
-  text.textContent = label;
+  const labelBtn = document.createElement("button");
+  labelBtn.type = "button";
+  labelBtn.className = "branch_indicator_label";
+  labelBtn.textContent = label;
+  labelBtn.addEventListener("click", () => onRouteCardClicked(2));
 
-  svg.appendChild(path);
-  svg.appendChild(arrow);
-  svg.appendChild(text);
-  return svg;
+  wrap.appendChild(curve);
+  wrap.appendChild(bar);
+  wrap.appendChild(labelBtn);
+  return wrap;
 }
 
 /** 駅と駅の間の区間DOMを生成する(共用区間の場合は赤線を重ね、分岐点の場合は分岐SVGを添える) */
@@ -695,30 +737,23 @@ function updateDirectionLabelVisibility() {
   if (downLabel) downLabel.classList.toggle("is-hidden", lastRect.bottom > headerBottom && lastRect.top < viewportBottom);
 }
 
-/** 列車マーカー1件のDOMを生成する。
- *  背景の丸は使わず、列車アイコン自体を系統色に着色し、系統番号はアイコン中央に重ねる。
+/** 列車マーカー1件のDOMを生成する。支給された列車アイコン(SVG)を系統番号に応じて使い分ける。
  *  上り(▲)はアイコンの上、下り(▼)はアイコンの下に表示する。 */
 function createTrainMarkerEl(train, coords) {
   const el = document.createElement("div");
   el.className = "train_marker";
   el.style.left = `${coords.x}px`;
   el.style.top = `${coords.y}px`;
-  const color = colorForLineNum(train.lineNum);
-  el.style.setProperty("--marker-color", color);
-  el.style.setProperty("--marker-badge-color", contrastTextColor(color));
+  el.style.setProperty("--marker-color", colorForLineNum(train.lineNum)); // 方向キャレットの色に使用
 
-  const vehicleIcon = VEHICLE_ICON_CLASS[train.vehicle] || DEFAULT_VEHICLE_ICON_CLASS;
-  const badge = train.lineNum ? `<span class="train_marker_badge">${train.lineNum}</span>` : "";
+  const iconPath = iconPathForTrain(train);
   const caretClass = train.direction === "up" ? "fa-caret-up is-up" : "fa-caret-down is-down";
 
   el.innerHTML = `
     <i class="fa-solid ${caretClass} train_marker_caret"></i>
-    <div class="train_marker_icon_wrap">
-      <i class="${vehicleIcon} train_marker_icon"></i>
-      ${badge}
-    </div>
+    <img class="train_marker_icon" src="${iconPath}" alt="${train.lineNum || ""}" draggable="false">
   `;
-  el.addEventListener("click", () => openTrainModal(train));
+  el.addEventListener("click", (e) => openTrainModal(train, e.currentTarget));
   return el;
 }
 
@@ -762,10 +797,10 @@ function updateTrainMarkers() {
    8. モーダル・トースト
    ========================================================= */
 
-/** 列車アイコンタップ時、その列車の詳細(系統・種別・行先・各駅発車時刻)を表示する。
- *  あくまで時刻表からの予測のため「現在位置」を断定表示することはせず、
+/** 列車アイコンタップ時、その列車の詳細(種別・始発・終点・各駅発車時刻等)を吹き出しで表示する。
+ *  系統は四角バッジで示すため「系統」欄は出さない。あくまで時刻表からの予測のため断定表示は避け、
  *  各駅時刻一覧では通過済みを薄く、現在停車中の駅をオレンジで強調したうえで、その行が最初から見えるようスクロールする。 */
-function openTrainModal(train) {
+function openTrainModal(train, anchorEl) {
   state.activeTrainForModal = train;
   const body = document.getElementById("modalBody");
   const color = colorForLineNum(train.lineNum);
@@ -786,25 +821,63 @@ function openTrainModal(train) {
     .join("");
 
   body.innerHTML = `
-    <div class="modal_title">
-      <span class="modal_badge" style="--modal-line-color:${color}">${train.lineNum || "-"}</span>
+    <div class="modal_title" style="--modal-title-color:${color}">
+      <span class="modal_badge" style="--modal-line-color:${color}">${toFullWidthLineNum(train.lineNum) || "-"}</span>
       <span>${train.destination}${state.language === "ja" ? '<span class="modal_title_suffix"> 行</span>' : ""}</span>
     </div>
-    <div class="modal_row"><span>${t("modalLine")}</span><span>${train.lineNum || "-"}</span></div>
     <div class="modal_row"><span>${t("modalType")}</span><span>${typeLabel}</span></div>
     <div class="modal_row"><span>${t("modalDeparture")}</span><span>${train.departure}</span></div>
     <div class="modal_row"><span>${t("modalDestination")}</span><span>${train.destination}</span></div>
-    ${train.note ? `<div class="modal_row"><span>Note</span><span>${train.note}</span></div>` : ""}
+    ${train.note ? `<div class="modal_row"><span>${t("modalNote")}</span><span>${train.note}</span></div>` : ""}
     <div class="modal_row" style="border-bottom:none;padding-top:10px;"><span>${t("modalStations")}</span><span></span></div>
     <div class="modal_station_list" id="modalStationList">${stationRows}</div>
   `;
   document.getElementById("trainModal").classList.remove("is-hidden");
+  positionModalBubble(anchorEl);
 
   // 現在地(停車中 or 直前に停車していた駅)の行を最初から見える位置へスクロールする
   const list = document.getElementById("modalStationList");
   const currentRow = list.querySelector(".modal_station_row.is-current");
   const targetRow = currentRow || list.querySelector(".modal_station_row.is-upcoming") || list.lastElementChild;
   targetRow?.scrollIntoView({ block: "center" });
+}
+
+/** 列車情報の吹き出しを、タップされたアイコンの近くに配置する(画面外にはみ出さないよう調整)。 */
+function positionModalBubble(anchorEl) {
+  const box = document.getElementById("modalBox");
+  box.classList.remove("bubble-above", "bubble-below");
+  if (!anchorEl) {
+    box.style.left = "50%";
+    box.style.top = "50%";
+    box.style.transform = "translate(-50%,-50%)";
+    return;
+  }
+
+  const rect = anchorEl.getBoundingClientRect();
+  const margin = 12;
+  const boxWidth = Math.min(320, window.innerWidth - margin * 2);
+  const centerX = rect.left + rect.width / 2;
+  const clampedLeft = Math.min(Math.max(centerX, margin + boxWidth / 2), window.innerWidth - margin - boxWidth / 2);
+
+  const spaceAbove = rect.top;
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const placeAbove = spaceAbove > spaceBelow;
+
+  box.style.width = `${boxWidth}px`;
+  box.style.left = `${clampedLeft}px`;
+  box.style.transform = "translateX(-50%)";
+  if (placeAbove) {
+    box.style.top = "auto";
+    box.style.bottom = `${window.innerHeight - rect.top + margin}px`;
+    box.classList.add("bubble-above");
+  } else {
+    box.style.bottom = "auto";
+    box.style.top = `${rect.bottom + margin}px`;
+    box.classList.add("bubble-below");
+  }
+  // 吹き出しの三角(tail)をアイコンの真上/真下に近づける
+  const tailOffset = centerX - clampedLeft;
+  box.style.setProperty("--bubble-tail-offset", `${tailOffset}px`);
 }
 
 function closeTrainModal() {
@@ -873,6 +946,45 @@ function stopLiveClock() {
   state.liveTimer = null;
 }
 
+/** 再生中、1秒おきに時刻表示とマーカーを更新する(現在時刻ライブ更新の30秒間隔より細かく動かすため) */
+function startPlaybackTicker() {
+  stopPlaybackTicker();
+  state.playTimer = setInterval(() => {
+    document.getElementById("timeInput").value = secondsToHHMM(Math.floor(getEffectiveNowSeconds()));
+    updateTrainMarkers();
+  }, 1000);
+}
+function stopPlaybackTicker() {
+  if (state.playTimer) clearInterval(state.playTimer);
+  state.playTimer = null;
+}
+
+/** 再生ボタンの表示(アイコン・ラベル)を再生状態・現在言語に合わせて更新する */
+function updatePlayButtonUI() {
+  const icon = document.getElementById("playButtonIcon");
+  const label = document.getElementById("playButtonLabel");
+  icon.className = state.isPlaying ? "fa-solid fa-stop" : "fa-solid fa-play";
+  label.textContent = state.isPlaying ? t("pauseButton") : t("playButton");
+}
+
+/** 再生ボタンの処理。手動指定した時刻を起点に、実時間の経過と同じ速さで時刻を進める(もう一度押すと停止)。 */
+function togglePlay() {
+  if (state.isPlaying) {
+    state.manualTime = Math.floor(getEffectiveNowSeconds()) % 86400;
+    state.isPlaying = false;
+    state.playBase = null;
+    stopPlaybackTicker();
+    startLiveClock();
+  } else {
+    const base = state.manualTime !== null ? state.manualTime : nowSecondsReal();
+    state.playBase = { simSec: base, realMs: Date.now() };
+    state.isPlaying = true;
+    stopLiveClock();
+    startPlaybackTicker();
+  }
+  updatePlayButtonUI();
+}
+
 /** 運行日セレクトの表示テキストを現在の言語に合わせて更新する */
 function applyDayTypeOptionLabels() {
   const select = document.getElementById("dayTypeSelect");
@@ -898,6 +1010,7 @@ function toggleLanguage() {
   document.documentElement.lang = state.language;
   document.getElementById("langButtonLabel").textContent = state.language === "ja" ? "EN" : "JP";
   applyStaticI18n();
+  updatePlayButtonUI();
   renderRouteSelect();
   if (state.view === "line1") {
     renderLineDiagram();
@@ -939,8 +1052,16 @@ function cycleTheme() {
   applyTheme();
 }
 
-/** 運行日・時刻の操作パネルの値が変わったときに呼び出す(手動モードへ切り替え、即時再描画) */
+/** 運行日・時刻の操作パネルの値が変わったときに呼び出す(手動モードへ切り替え、即時再描画)。
+ *  再生中にユーザーが時刻/運行日を変更した場合は、再生を止めてその新しい値を基準にする。 */
 function onControlPanelChanged() {
+  if (state.isPlaying) {
+    state.isPlaying = false;
+    state.playBase = null;
+    stopPlaybackTicker();
+    startLiveClock();
+    updatePlayButtonUI();
+  }
   const daySelect = document.getElementById("dayTypeSelect");
   const timeInput = document.getElementById("timeInput");
   state.dayType = daySelect.value;
@@ -948,13 +1069,18 @@ function onControlPanelChanged() {
   updateTrainMarkers();
 }
 
-/** 「現在時刻に戻す」ボタンの処理。手動指定を解除し、実際の現在時刻・運行日に復帰する。 */
+/** 「現在時刻に戻す」ボタンの処理。再生・手動指定を解除し、実際の現在時刻・運行日に復帰する。 */
 function resetToNow() {
   const now = new Date();
+  state.isPlaying = false;
+  state.playBase = null;
+  stopPlaybackTicker();
   state.manualTime = null;
   state.dayType = defaultDayTypeFromDate(now);
   document.getElementById("dayTypeSelect").value = state.dayType;
   document.getElementById("timeInput").value = secondsToHHMM(nowSecondsReal());
+  updatePlayButtonUI();
+  startLiveClock();
   updateTrainMarkers();
 }
 
@@ -969,6 +1095,7 @@ function initEventListeners() {
   document.getElementById("dayTypeSelect").addEventListener("change", onControlPanelChanged);
   document.getElementById("timeInput").addEventListener("change", onControlPanelChanged);
   document.getElementById("nowButton").addEventListener("click", resetToNow);
+  document.getElementById("playButton").addEventListener("click", togglePlay);
   document.getElementById("modalCloseButton").addEventListener("click", closeTrainModal);
   document.getElementById("trainModal").addEventListener("click", (e) => {
     if (e.target.id === "trainModal") closeTrainModal();
@@ -1003,6 +1130,7 @@ function init() {
 
   applyTheme();
   applyStaticI18n();
+  updatePlayButtonUI();
   renderRouteSelect();
   initEventListeners();
   syncHeaderHeight();

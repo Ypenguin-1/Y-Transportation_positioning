@@ -72,6 +72,11 @@
           <i class="fa-solid fa-clock-rotate-left"></i>
           <span data-i18n="nowButton">現在時刻に戻す</span>
         </button>
+        <!--手動指定時刻からリアルタイムで進行/停止させる再生ボタン-->
+        <button type="button" id="playButton" class="header_btn play_btn">
+          <i class="fa-solid fa-play" id="playButtonIcon"></i>
+          <span id="playButtonLabel">再生</span>
+        </button>
       </div>
     </header>
 
@@ -109,7 +114,7 @@
 
     <!--列車情報モーダル(列車アイコンタップで表示)-->
     <div class="modal_overlay is-hidden" id="trainModal">
-      <div class="modal_box" role="dialog" aria-modal="true">
+      <div class="modal_box" id="modalBox" role="dialog" aria-modal="true">
         <button type="button" class="modal_close" id="modalCloseButton" aria-label="Close">
           <i class="fa-solid fa-xmark"></i>
         </button>
