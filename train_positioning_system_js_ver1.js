@@ -59,8 +59,11 @@ const OVERLAP_SEGMENT_PAIRS = [
 /** 共用区間(鹿児島駅前～天文館通)の両端駅コード */
 const DUPLICATE_SECTION_ENDPOINTS = ["I_01", "I_07"];
 
-/** 2系統が分岐する駅コード(天文館通～高見馬場、郡元～郡元(南側))。線の分岐UIは今後対応予定。 */
+/** 2系統が分岐する駅コード(天文館通～高見馬場、郡元～郡元(南側)) */
 const BRANCH_POINT_STATIONS = ["I_07", "I_08", "I_16", "I_17"];
+
+/** 分岐が始まる側の駅コード(この駅の次の区間に、赤い分岐線を描画する) */
+const BRANCH_START_STATIONS = ["I_07", "I_16"];
 
 /** 区間情報ボタンを表示する駅コード(共用区間の両端 or 分岐点) */
 const JUNCTION_INFO_STATIONS = Array.from(new Set([...DUPLICATE_SECTION_ENDPOINTS, ...BRANCH_POINT_STATIONS]));
@@ -177,6 +180,7 @@ const I18N = {
     typeLocal: "普通",
     directionUp: (name) => `${name} 方面`,
     directionDown: (name) => `${name} 方面`,
+    branchLabel: "2系統",
     junctionButtonLabel: "区間情報",
     junctionDuplicateToast: "鹿児島駅前～天文館通は2系統との共用区間です。2系統は現在準備中です。",
     junctionBranchToast: "この先は2系統との分岐区間です。2系統は現在準備中です。",
@@ -205,6 +209,7 @@ const I18N = {
     typeLocal: "Local",
     directionUp: (name) => `To ${name}`,
     directionDown: (name) => `To ${name}`,
+    branchLabel: "Line 2",
     junctionButtonLabel: "Section info",
     junctionDuplicateToast: "Kagoshima-ekimae - Tenmonkan-dori is shared with Line 2, which is currently under development.",
     junctionBranchToast: "Beyond here is where Line 2 branches off. Line 2 is currently under development.",
@@ -607,11 +612,43 @@ function createStationBlock(station, index, opts) {
   return wrap;
 }
 
-/** 駅と駅の間の区間DOMを生成する(共用区間の場合は赤線を重ねる) */
-function createSegmentBlock(isOverlap) {
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+/** 分岐点を示すSVGを生成する。1系統の青線はそのまま直進させ、その手前から2系統色(赤)の線を
+ *  右へカーブさせて分岐させ、矢印とラベルを添える(実際のトラック形状の模式図)。 */
+function createBranchIndicator(label) {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("class", "branch_indicator");
+  svg.setAttribute("viewBox", "0 0 140 80");
+  svg.setAttribute("width", "140");
+  svg.setAttribute("height", "80");
+
+  const path = document.createElementNS(SVG_NS, "path");
+  path.setAttribute("class", "branch_indicator_line");
+  path.setAttribute("d", "M0,0 L0,30 Q0,42 14,42 L78,42");
+
+  const arrow = document.createElementNS(SVG_NS, "polygon");
+  arrow.setAttribute("class", "branch_indicator_arrow");
+  arrow.setAttribute("points", "76,34 94,42 76,50");
+
+  const text = document.createElementNS(SVG_NS, "text");
+  text.setAttribute("class", "branch_indicator_label");
+  text.setAttribute("x", "98");
+  text.setAttribute("y", "46");
+  text.textContent = label;
+
+  svg.appendChild(path);
+  svg.appendChild(arrow);
+  svg.appendChild(text);
+  return svg;
+}
+
+/** 駅と駅の間の区間DOMを生成する(共用区間の場合は赤線を重ね、分岐点の場合は分岐SVGを添える) */
+function createSegmentBlock(isOverlap, hasBranch) {
   const seg = document.createElement("div");
   seg.className = "segment" + (isOverlap ? " segment--overlap" : "");
   seg.innerHTML = '<div class="boder"></div><div class="segment_top"></div><div class="segment_bottom"></div>';
+  if (hasBranch) seg.appendChild(createBranchIndicator(t("branchLabel")));
   return seg;
 }
 
@@ -628,7 +665,7 @@ function renderLineDiagram() {
     body.appendChild(
       createStationBlock(station, i, { isFirst: i === 0, isLast: i === lastIndex, topOverlap: prevOverlap, bottomOverlap: nextOverlap })
     );
-    if (i < lastIndex) body.appendChild(createSegmentBlock(nextOverlap));
+    if (i < lastIndex) body.appendChild(createSegmentBlock(nextOverlap, BRANCH_START_STATIONS.includes(station.code)));
   });
 
   document.getElementById("directionUpLabel").textContent = t("directionUp")(
