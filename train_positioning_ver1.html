@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>列車位置アプリ</title>
+
+  <!--バージョン確認--><!--JSはbodyの最後！-->
+  <link rel="stylesheet", href="train_positioning_ver1.css"> 
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <!--フォント読み込み-->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!--アイコン-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+
+</head>
+
+<body>
+    <div class="positioning_system">
+        <!--ヘッダ-->
+        <div class="train_header">
+            <div class="page_top">
+                <i class="fa-solid fa-train"></i>
+                列車位置情報サイト(開発中)
+            </div>
+
+            <div class="top_attention">
+            
+                <div class="top_attention_text">
+                 <i class="fa-solid fa-triangle-exclamation"></i>
+                    時刻による位置の予測です。実際の位置情報とは異なる可能性があるためご注意ください。
+                </div>
+            </div>
+        </div>
+         
+        <!--ボディ-->
+        <div class="train_body">
+            <!--方向(上)-->
+            <div class="map_direction_up">
+             <div class="map_direction_box">
+                品川・東京 <span class="houmen">方面</span>
+             </div>
+            </div>
+            
+
+            <!--駅表示(始点用)-->
+            <div class="station_area Top_station_area">
+                <div class="station_area_top Top_station_area_top"></div>
+
+                <div class="station_center">
+                    <div class="station_name">東京</div>
+                    <div class="station_point_out">
+                        <div class="station_point_in"></div>
+                    </div>
+                </div>
+
+                <div class="station_area_bottom Top_station_area_bottom">
+                    <div class="boder"></div>
+                </div>
+            </div>
+            <!--区間-->
+            <div class="segment">
+                <div class="boder"></div>
+                <div class="segment_top"></div>
+                <div class="segment_bottom"></div>
+
+            </div>
+
+            <!--駅表示-->
+            <div class="station_area">
+                <div class="station_area_top">
+                    <div class="boder"></div>
+                </div>
+
+                <div class="station_center">
+                    <div class="station_name">高輪ゲートウェイ</div>
+                    <div class="station_point_out">
+                        <div class="station_point_in"></div>
+                    </div>
+                </div>
+
+                <div class="station_area_bottom">
+                    <div class="boder"></div>
+                </div>
+            </div>
+            <!--区間-->
+            <div class="segment">
+                <div class="boder"></div>
+                <div class="segment_top"></div>
+                <div class="segment_bottom"></div>
+
+            </div>
+
+            <!--駅表示-->
+            <div class="station_area">
+                <div class="station_area_top">
+                    <div class="boder"></div>
+                </div>
+
+                <div class="station_center">
+                    <div class="station_name">相生</div>
+                    <div class="station_point_out">
+                        <div class="station_point_in"></div>
+                    </div>
+                </div>
+
+                <div class="station_area_bottom">
+                    <div class="boder"></div>
+                </div>
+            </div>
+            <!--区間-->
+            <div class="segment">
+                <div class="boder"></div>
+                <div class="segment_top"></div>
+                <div class="segment_bottom"></div>
+
+            </div>
+
+            <!--駅表示-->
+            <div class="station_area">
+                <div class="station_area_top">
+                    <div class="boder"></div>
+                </div>
+
+                <div class="station_center">
+                    <div class="station_name">長崎</div>
+                    <div class="station_point_out">
+                        <div class="station_point_in"></div>
+                    </div>
+                </div>
+
+                <div class="station_area_bottom">
+                </div>
+            </div>
+
+        </div>
+
+         <!--方向(下)-->
+            <div class="map_direction_down">
+             <div class="map_direction_box">
+                鹿児島中央 <span class="houmen">方面</span>
+             </div>
+            </div>
+
+        <!--アウト-->
+        <div class="train_outline">
+
+
+        </div>
+    </div>
+    
+    <!--JS-->
+    <script src="train_positioning_system_js_ver1.js"></script>
+
+</body>
+</html>
