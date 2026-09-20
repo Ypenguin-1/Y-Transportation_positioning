@@ -33,6 +33,7 @@
   --line2-color:#FF2929;
   --no-line-color:#A6A6A6;
   --arrived-color:#FF8A00; /* 到着済み(停車中)の駅を示すオレンジ */
+  --overlay-color:#FF2929; /* 路線詳細画面で「もう一方の系統」を示す色。JSが表示中の系統に応じて上書きする */
 
   /* 駅・区間ブロックの高さ(JS側の座標計算と必ず一致させること) */
   --station-top-h:45px;
@@ -40,6 +41,12 @@
   --station-bottom-h:45px;
   --segment-top-h:55px;
   --segment-bottom-h:55px;
+
+  /* 四角囲み数字(系統バッジ)専用フォント。Windows/Office提供のゴシック体を優先する */
+  --badge-font:"Yu Gothic UI","Yu Gothic","MS Gothic","Gothic E","Noto Sans JP",sans-serif;
+
+  /* 各駅発車時刻の行の高さ(5行分ぴったり表示するため固定値とする) */
+  --modal-row-h:34px;
 }
 
 :root[data-theme="light"]{
@@ -182,6 +189,20 @@ button{
   color:var(--text-color);
 }
 
+/* 運行日・時刻パネルのボタン(現在時刻に戻す/再生/停止)は、ヘッダの緑背景ではなく
+   パネル背景(ライトモードでは白系)の上に乗るため、文字色・縁を独自に指定する。
+   (ヘッダ直下のlang/theme/backボタンは白背景に強い緑ヘッダ上にあるため対象外) */
+.control_panel .header_btn{
+  color:var(--text-color);
+  border:1px solid var(--card-border);
+  background:var(--btn-bg);
+}
+.control_panel .header_btn:hover{ background:var(--btn-bg-hover); }
+.control_panel .header_btn:disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+}
+
 /* ---------------------------------------------------------
    3. メイン/路線選択画面
    --------------------------------------------------------- */
@@ -236,7 +257,7 @@ button{
   border-radius:8px;
   background:var(--route-color,#888);
   color:#fff;
-  font-family:"Noto Sans JP",sans-serif;
+  font-family:var(--badge-font);
   font-weight:700;
   font-size:16px;
 }
@@ -383,6 +404,33 @@ button{
   gap:6px;
 }
 
+.station_timetable_menu{
+  position:fixed;
+  z-index:2100;
+  min-width:150px;
+  background:var(--modal-bg);
+  color:var(--text-color);
+  border-radius:10px;
+  padding:6px;
+  box-shadow:var(--shadow);
+}
+.station_menu_item{
+  display:block;
+  width:100%;
+  text-align:left;
+  border:none;
+  background:none;
+  color:var(--text-color);
+  font-size:13px;
+  padding:8px 10px;
+  border-radius:6px;
+}
+.station_menu_item:hover{ background:var(--btn-bg-hover); }
+.station_menu_item[disabled]{
+  color:var(--muted-text);
+  cursor:not-allowed;
+}
+
 .station_link_btn{
   border:none;
   background:var(--btn-bg);
@@ -398,17 +446,6 @@ button{
 }
 .station_link_btn:hover{ color:var(--text-color); }
 
-/* 分岐/共用区間バッジ(2系統との共用区間などを示す) */
-.station_junction_btn{
-  border:none;
-  background:none;
-  color:var(--muted-text);
-  font-size:13px;
-  padding:2px 4px;
-  cursor:pointer;
-}
-.station_junction_btn:hover{ color:var(--text-color); }
-
 .station_point_out{
   position:absolute;
   left:0;
@@ -416,6 +453,7 @@ button{
   margin:auto;
   top:0;
   bottom:0;
+  z-index:3; /* 駅間を貫く連結線(station_center_line)より必ず手前に描画する */
   display:flex;
   justify-content:center;
   align-items:center;
@@ -423,6 +461,23 @@ button{
   height:24px;
   border-radius:50%;
   background:var(--route-color);
+}
+
+/* 駅の●を路線の連結線が貫通しているように見せるため、station_center内にも
+   station_area_top/bottomと同じ太さ・色の連結線を通す(●の上下に隙間を作らない)。 */
+.station_center_line{
+  top:0;
+  height:100%;
+}
+.station_center--overlap::before{
+  content:"";
+  position:absolute;
+  left:calc(50% - 7px);
+  width:3px;
+  top:0;
+  height:100%;
+  background:var(--overlay-color);
+  z-index:1;
 }
 
 /* 駅の●の内側の色はライト/ダークどちらでも常に白 */
@@ -467,8 +522,8 @@ button{
 .station_area_top .boder{ top:-2px; bottom:-2px; height:calc(100% + 2px); }
 .station_area_bottom .boder{ top:-2px; bottom:-2px; height:calc(100% + 2px); }
 
-/* 2系統との共用区間(鹿児島駅前～天文館通): 1系統の青線は他区間と同じ太さ・位置のまま変えず、
-   その左側にひとまわり細い(青の約1/3幅)2系統色(赤)の線を添えて「2本の線」に見せる。 */
+/* もう一方の系統との共用区間(鹿児島駅前～高見馬場): 自路線の線は他区間と同じ太さ・位置のまま変えず、
+   その左側にひとまわり細い(約1/3幅)もう一方の系統色の線を添えて「2本の線」に見せる。 */
 .segment--overlap,
 .station_area_top--overlap,
 .station_area_bottom--overlap{ position:relative; }
@@ -480,54 +535,48 @@ button{
   position:absolute;
   left:calc(50% - 7px);
   width:3px;
-  background:var(--line2-color);
+  background:var(--overlay-color);
   z-index:1;
 }
 .segment--overlap::before{ top:0; height:100%; }
 .station_area_top--overlap::before{ top:-2px; bottom:-2px; height:calc(100% + 2px); }
 .station_area_bottom--overlap::before{ top:-2px; bottom:-2px; height:calc(100% + 2px); }
 
-/* 分岐点(天文館通～高見馬場、郡元～郡元(南側)):
-   1系統の青線はそのまま直進させる。2系統色(赤)の細い線は共用区間からの続きとして左側から始まり、
-   青の下をくぐるカーブで右へ抜けたあと、画面右端近くまでまっすぐ伸びる。矢印(→)は使わず、
-   右端に残した空白の「2系統」ラベルをタップすると2系統のページ(準備中)へ移動する。 */
+/* 分岐点(高見馬場の先): 自路線の線はそのまま直進させる。もう一方の系統色の細い線は共用区間からの
+   続きとして左側(station_center--overlapの終端)からそのまま連続して始まり、太さ3pxから8px
+   (本線と同じ太さ)へなめらかに(グラデーション状に)テーパーしながら右へカーブし、青の下を
+   くぐったあと画面右端近くまでまっすぐ伸びる。帯全体を1つの塗りつぶしパスとして描画することで、
+   カーブ~直線の継ぎ目に太さの段差(ガタつき)が出ないようにしている。
+   右端に残した「◯系統」ラベルをタップするともう一方の路線ページへ移動する。 */
 .branch_indicator{
   position:absolute;
-  top:16px;
+  top:0; /* 手前の駅の連結線・共用区間の細線と隙間なくつながるよう、区間の最上部から開始する */
   left:0;
   right:0;
-  height:30px;
-  z-index:1; /* 青の.boder(z-index:2)の下を通す */
+  height:34px;
+  z-index:1; /* 本線の.boder(z-index:2)の下を通す */
   pointer-events:none;
 }
-.branch_indicator_curve{
+.branch_indicator_svg{
   position:absolute;
   top:0;
-  left:calc(50% - 12px);
+  left:0;
+  width:100%;
+  height:34px;
   overflow:visible;
 }
-.branch_indicator_curve path{
-  fill:none;
-  stroke:var(--line2-color);
-  stroke-width:3;
-  stroke-linecap:round;
-}
-.branch_indicator_bar{
-  position:absolute;
-  top:24px;
-  left:calc(50% + 28px);
-  right:60px;
-  height:3px;
-  background:var(--line2-color);
+.branch_indicator_svg path{
+  fill:var(--overlay-color);
+  stroke:none;
 }
 .branch_indicator_label{
   position:absolute;
-  top:8px;
+  top:9px;
   right:2px;
   pointer-events:auto;
   border:none;
   background:none;
-  color:var(--line2-color);
+  color:var(--overlay-color);
   font-weight:700;
   font-size:13px;
   padding:4px 4px;
@@ -584,7 +633,9 @@ button{
   position:fixed;
   width:300px;
   max-width:calc(100vw - 24px);
-  max-height:70vh;
+  /* 縦方向の最大高はJS側(positionModalBubble)が配置先の余白に応じて動的に設定し、
+     画面から見切れないようにする。ここでは初期値/フォールバックのみ指定する。 */
+  max-height:min(70vh, calc(100vh - 24px));
   overflow-y:auto;
   background:var(--modal-bg);
   color:var(--text-color);
@@ -633,8 +684,9 @@ button{
   margin-bottom:10px;
 }
 
-/* 行き先の地名・「行」は同じ色(系統色)で揃える。「行」は地名より一回り小さく表示する。 */
-.modal_title > span:not(.modal_badge){ color:var(--modal-title-color,inherit); }
+/* 行き先の地名・「行」は系統色ではなく、テーマの標準文字色(黒/白)で表示する。
+   系統は隣の四角バッジ(modal_badge)の色で示すため、行き先自体は常に読みやすい黒/白のままにする。 */
+.modal_title > span:not(.modal_badge){ color:var(--text-color); }
 .modal_title_suffix{
   font-size:0.7em;
   font-weight:400;
@@ -649,7 +701,7 @@ button{
   padding:0 4px;
   border-radius:6px;
   color:#fff;
-  font-family:"Noto Sans JP",sans-serif;
+  font-family:var(--badge-font);
   font-weight:700;
   font-size:16px;
   background:var(--modal-line-color,#888);
@@ -672,7 +724,8 @@ button{
 
 .modal_station_list{
   margin-top:10px;
-  max-height:220px;
+  /* スクロールせずに見える行数を必ず5行にする(それ以上は上下スクロールで見る) */
+  max-height:calc(var(--modal-row-h) * 5);
   overflow-y:auto;
   border:1px solid var(--card-border);
   border-radius:8px;
@@ -680,8 +733,11 @@ button{
 
 .modal_station_row{
   display:flex;
+  align-items:center;
   justify-content:space-between;
-  padding:6px 10px;
+  height:var(--modal-row-h);
+  box-sizing:border-box;
+  padding:0 10px;
   font-size:13px;
   border-bottom:1px solid var(--card-border);
 }
