@@ -50,17 +50,12 @@ const LINE1_STATIONS = [
   { code: "I_25", ja: "谷山",             en: "Tanyama" },
 ];
 
-/** 2系統(鹿児島駅前～郡元)の駅一覧。並び順=画面表示順(上→下)。
- *  鹿児島駅前～高見馬場(N_01～N_08)は1系統と同じ物理駅(共用区間)だが、
- *  「それぞれの路線にその路線から来た列車を表示する」ため、1系統側(I_01～I_08)とは
- *  別の駅ノードとしてここに用意する。 */
+/** 2系統(天文館通～中郡)の駅一覧。並び順=画面表示順(上→下)。
+ *  2系統の画面自体は1系統に統一し、この駅一覧は天文館通～中郡(高見馬場までの共用トランク区間の
+ *  末尾～2系統固有区間の末尾)のみを表示する。鹿児島駅前～天文館通の共用トランク前半と、
+ *  郡元(2系統の実質的な終点)は1系統側の画面に統一して表示する(郡元は1系統のI_16を参照)。
+ *  天文館通・中郡の両端には1系統画面へのリンクを表示する。 */
 const LINE2_STATIONS = [
-  { code: "N_01", ja: "鹿児島駅前",       en: "Kagoshima-ekimae" },
-  { code: "N_02", ja: "桜島桟橋通",       en: "Sakurajima-sanbashi-dori" },
-  { code: "N_03", ja: "水族館口",         en: "Suizokukan-guchi" },
-  { code: "N_04", ja: "市役所前",         en: "Shiyakusho-mae" },
-  { code: "N_05", ja: "朝日通",           en: "Asahi-dori" },
-  { code: "N_06", ja: "いづろ通",         en: "Izuro-dori" },
   { code: "N_07", ja: "天文館通",         en: "Tenmonkan-dori" },
   { code: "N_08", ja: "高見馬場",         en: "Takami-baba" },
   { code: "N_09", ja: "加治屋町",         en: "Kajiya-cho" },
@@ -74,7 +69,6 @@ const LINE2_STATIONS = [
   { code: "N_17", ja: "工学部前",         en: "Kogakubu-mae" },
   { code: "N_18", ja: "純心学園前",       en: "Junshin-gakuen-mae" },
   { code: "N_19", ja: "中郡",             en: "Nakagori" },
-  { code: "N_20", ja: "郡元",             en: "Kogen" },
 ];
 
 /** 隣接する駅コードのペア配列を作る(区間の共用区間判定・重複区間の線描画に使用) */
@@ -90,8 +84,10 @@ function isOverlapSegment(route, codeA, codeB) {
 }
 
 /** 路線メタ情報。色は仕様書指定の値、Line_Numが空欄の列車は NO_LINE_COLOR で表示する。
- *  鹿児島駅前～高見馬場(1系統:I_01～I_08 / 2系統:N_01～N_08)は物理的に共用するトランク区間。
- *  高見馬場の先で1系統(→甲東中学校前方面)と2系統(→加治屋町方面)に分岐する。 */
+ *  鹿児島駅前～高見馬場(1系統:I_01～I_08)は2系統と物理的に共用するトランク区間。
+ *  高見馬場の先で1系統(→甲東中学校前方面)と2系統(→加治屋町方面)に分岐する。
+ *  郡元(I_16)は2系統の実質的な終点でもあるため、郡元～郡元(南側)の間にも
+ *  2系統への導線(分岐表示)を追加する。 */
 const ROUTES = {
   1: {
     id: 1,
@@ -111,9 +107,9 @@ const ROUTES = {
     id: 2,
     color: "#FF2929",
     nameJa: "2系統", nameEn: "Line 2",
-    fromJa: "鹿児島駅前", fromEn: "Kagoshima-ekimae",
+    fromJa: "天文館通", fromEn: "Tenmonkan-dori",
     viaJa: "鹿児島中央駅前", viaEn: "Kagoshima-chuo-ekimae",
-    toJa: "郡元", toEn: "Kogen",
+    toJa: "中郡", toEn: "Nakagori",
     files: {
       down: "timetables/Kagoshima_city_tram/26_002_D_Timetable.csv",
       up: "timetables/Kagoshima_city_tram/26_002_U_Timetable.csv",
@@ -124,13 +120,21 @@ const ROUTES = {
   },
 };
 
-// 各路線の共用区間(トランク区間: 鹿児島駅前～高見馬場)・分岐開始駅を設定する。
-Object.values(ROUTES).forEach((route) => {
-  const trunkCodes = route.stations.slice(0, 8).map((s) => s.code); // 鹿児島駅前～高見馬場の8駅
-  route.overlapPairs = consecutivePairs(trunkCodes);
-  route.duplicateEndpoints = [trunkCodes[0], trunkCodes[trunkCodes.length - 1]];
-  route.branchAfterCode = trunkCodes[trunkCodes.length - 1]; // 高見馬場
-});
+/** 1系統(I_01～I_08)・2系統(N_07～N_08、鹿児島駅前～天文館通は1系統側にのみ描画)の
+ *  共用トランク区間の隣接ペア。この区間は自路線の色に、もう一方の系統色を細線で重ねる。 */
+ROUTES[1].overlapPairs = consecutivePairs(LINE1_STATIONS.slice(0, 8).map((s) => s.code));
+ROUTES[2].overlapPairs = consecutivePairs(LINE2_STATIONS.slice(0, 2).map((s) => s.code)); // 天文館通-高見馬場のみ
+
+/** 1系統の画面に表示する分岐点。afterCodeの駅の直後の区間に、otherRouteIdへの分岐帯を描画する。
+ *  ①高見馬場の先: 2系統本来の分岐 ②郡元の先: 2系統の郡元発着列車をここに重ねて表示するための導線。 */
+ROUTES[1].branchPoints = [
+  { afterCode: "I_08", otherRouteId: 2 },
+  { afterCode: "I_16", otherRouteId: 2 },
+];
+ROUTES[2].branchPoints = [];
+
+/** 2系統の画面(天文館通～中郡)の両端は1系統画面への導線とする(afterIndexは要素挿入位置の目印)。 */
+ROUTES[2].edgeLinks = { top: 1, bottom: 1 };
 
 /** 直通(003ファイル)列車の停車駅を、表示先の路線の駅コードへ読み替えるための「駅名→駅コード」対応表。
  *  駅名が一致しない(=その路線の路線図上には存在しない)駅はそのまま(003固有のX_xxコード)にしておく
@@ -161,22 +165,44 @@ const NO_LINE_COLOR = "#A6A6A6";
 /** 駅の時刻表URLスロット数(駅名で判定)。
  *  ・鹿児島駅前～高見馬場(共用トランク区間)と郡元は、系統ごとの時刻表が複数存在するため3つ
  *  ・1系統の高見馬場～谷山(郡元以外)、2系統の高見馬場～中郡(郡元以外)は2つ */
-const TIMETABLE_URL_SLOT_COUNT_DEFAULT = 2;
 const TIMETABLE_URL_3SLOT_STATIONS = new Set([
   "鹿児島駅前", "桜島桟橋通", "水族館口", "市役所前", "朝日通", "いづろ通", "天文館通", "高見馬場", // トランク区間
-  "郡元", // 1系統(I_16)・2系統(N_20)どちらからも到達する駅
+  "郡元", // 1系統(I_16)。2系統の郡元発着列車もここに表示されるため同様に扱う。
 ]);
+/** 1系統の固有区間(高見馬場～谷山、郡元を除く)の駅名 */
+const LINE1_ONLY_NAMES = new Set(
+  LINE1_STATIONS.slice(8).map((s) => s.ja).filter((n) => !TIMETABLE_URL_3SLOT_STATIONS.has(n))
+);
+/** 2系統の固有区間(高見馬場～中郡、駅一覧はすでに天文館通～中郡のみ)の駅名 */
+const LINE2_ONLY_NAMES = new Set(
+  LINE2_STATIONS.map((s) => s.ja).filter((n) => !TIMETABLE_URL_3SLOT_STATIONS.has(n))
+);
 
-/** 駅名 → 時刻表URL配列。値は運用担当者が直接書き換える(空文字="未設定")。
+/** 駅名から時刻表メニューの既定ラベル構成を決める。
+ *  共用トランク区間・郡元は「1系統/2系統/その他の列車」、各路線固有区間は「自路線/その他の列車」。 */
+function defaultTimetableLabels(stationName) {
+  if (TIMETABLE_URL_3SLOT_STATIONS.has(stationName)) return ["1系統", "2系統", "その他の列車"];
+  if (LINE1_ONLY_NAMES.has(stationName)) return ["1系統", "その他の列車"];
+  if (LINE2_ONLY_NAMES.has(stationName)) return ["2系統", "その他の列車"];
+  return ["その他の列車", "その他の列車"];
+}
+
+/** 駅名 → 時刻表エントリ配列({label, url})。urlは運用担当者が直接書き換える(空文字="未設定")。
  *  同じ駅名は1系統・2系統どちらの画面から開いても同じ配列を参照・編集できるよう共有する。 */
 const TIMETABLE_URLS = new Map();
-function timetableUrlsFor(stationName) {
+function timetableEntriesFor(stationName) {
   if (!TIMETABLE_URLS.has(stationName)) {
-    const count = TIMETABLE_URL_3SLOT_STATIONS.has(stationName) ? 3 : TIMETABLE_URL_SLOT_COUNT_DEFAULT;
-    TIMETABLE_URLS.set(stationName, new Array(count).fill(""));
+    TIMETABLE_URLS.set(stationName, defaultTimetableLabels(stationName).map((label) => ({ label, url: "" })));
   }
   return TIMETABLE_URLS.get(stationName);
 }
+
+/** 記入例: 鹿児島駅前の時刻表URL(運用担当者は他の駅も同様にurlを書き換えていく)。 */
+TIMETABLE_URLS.set("鹿児島駅前", [
+  { label: "1系統", url: "https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E9%B9%BF%E5%85%90%E5%B3%B6%E9%A7%85%E5%89%8D&kubun=0&syubetuId=1" },
+  { label: "2系統", url: "https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E9%B9%BF%E5%85%90%E5%B3%B6%E9%A7%85%E5%89%8D&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: "https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E9%B9%BF%E5%85%90%E5%B3%B6%E9%A7%85%E5%89%8D&kubun=0&syubetuId=1" },
+]);
 
 /** 乗り換え案内(駅名 → 乗り換え路線名の配列)。ここに無い駅は乗り換えボタン自体を表示しない。 */
 const TRANSFER_INFO = {
@@ -270,10 +296,11 @@ const I18N = {
     directionDown: (name) => `${name} 方面`,
     transferLabel: "乗り換え",
     timetableLabel: "時刻表",
+    displayModeLabel: "ディスプレイモード",
     featureComingSoonToast: "この機能は準備中です。",
     transferNoInfoToast: "この駅の乗り換え情報はありません。",
     timetableUrlUnsetToast: "このURLはまだ設定されていません。",
-    timetableSlotLabel: (n) => `時刻表${n}`,
+    backToLine1: "1系統",
   },
   en: {
     siteTitle: "Train Position Info",
@@ -302,10 +329,11 @@ const I18N = {
     directionDown: (name) => `To ${name}`,
     transferLabel: "Transfer",
     timetableLabel: "Timetable",
+    displayModeLabel: "Display mode",
     featureComingSoonToast: "This feature is currently under development.",
     transferNoInfoToast: "There is no transfer information for this station.",
     timetableUrlUnsetToast: "This URL has not been set yet.",
-    timetableSlotLabel: (n) => `Timetable ${n}`,
+    backToLine1: "Line 1",
   },
 };
 
@@ -321,6 +349,7 @@ const state = {
   manualTime: null,             // 手動指定時の秒数(0-86399)。nullなら現在時刻を使用。
   trains: { 1: null, 2: null },  // 系統ごとの読込済み列車データ(キャッシュ)
   directTrainsRaw: null,        // 003(直通)ファイルの生データキャッシュ(路線への割り当て前)
+  line2OwnTrainsRaw: null,      // 002(2系統固有)ファイルの生データキャッシュ
   liveTimer: null,
   activeTrainForModal: null,
   isPlaying: false,             // 手動指定時刻から実時間で進行中かどうか
@@ -356,10 +385,86 @@ function nowSecondsReal() {
   return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds();
 }
 
-/** 曜日から既定の運行日区分を推定する(祝日データは持たないため、日曜は"Holiday"扱いとする簡易実装) */
+/** 春分の日/秋分の日(日本、1980～2099年で有効な近似式)を「その年の3月/9月の日」として返す */
+function vernalEquinoxDay(year) {
+  return Math.floor(20.8431 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4));
+}
+function autumnalEquinoxDay(year) {
+  return Math.floor(23.2488 + 0.242194 * (year - 1980) - Math.floor((year - 1980) / 4));
+}
+
+/** 指定月の第n月曜日の日付(1-31)を返す(ハッピーマンデー祝日の算出用) */
+function nthMondayOfMonth(year, month, n) {
+  const first = new Date(year, month - 1, 1);
+  const offsetToMonday = (1 - first.getDay() + 7) % 7; // getDay: 0=日
+  return 1 + offsetToMonday + (n - 1) * 7;
+}
+
+/** 日本の祝日(月,日)を年ごとに算出する(固定日+ハッピーマンデー+春分/秋分)。
+ *  振替休日・国民の休日は isJapanesePublicHoliday 側でこの一覧を基に判定する。
+ *  対象期間の目安: 2000年～2099年(この範囲外は主要な固定日のみ有効)。 */
+function fixedJapaneseHolidays(year) {
+  const list = [
+    [1, 1],   // 元日
+    [2, 11],  // 建国記念の日
+    [4, 29],  // 昭和の日
+    [5, 3],   // 憲法記念日
+    [5, 4],   // みどりの日
+    [5, 5],   // こどもの日
+    [8, 11],  // 山の日
+    [11, 3],  // 文化の日
+    [11, 23], // 勤労感謝の日
+    [1, nthMondayOfMonth(year, 1, 2)],  // 成人の日(1月第2月曜)
+    [7, nthMondayOfMonth(year, 7, 3)],  // 海の日(7月第3月曜)
+    [9, nthMondayOfMonth(year, 9, 3)],  // 敬老の日(9月第3月曜)
+    [10, nthMondayOfMonth(year, 10, 2)], // スポーツの日(10月第2月曜)
+    [3, vernalEquinoxDay(year)],   // 春分の日
+    [9, autumnalEquinoxDay(year)], // 秋分の日
+  ];
+  if (year >= 2020) list.push([2, 23]); // 天皇誕生日(2020年～)
+  return list;
+}
+
+/** 指定した日付が日本の祝日(振替休日・国民の休日を含む)かどうかを判定する */
+function isJapanesePublicHoliday(date) {
+  const year = date.getFullYear();
+  const toKey = (m, d) => `${m}-${d}`;
+  const sameDate = (a, m, d) => a.getFullYear() === date.getFullYear() && a.getMonth() === m - 1 && a.getDate() === d;
+
+  const collectHolidaySet = (y) => new Set(fixedJapaneseHolidays(y).map(([m, d]) => toKey(m, d)));
+  const thisYearSet = collectHolidaySet(year);
+  const key = toKey(date.getMonth() + 1, date.getDate());
+  if (thisYearSet.has(key)) return true;
+
+  // 振替休日: 祝日が日曜のとき、直後の祝日でない平日を休日とする
+  const isFixedHoliday = (y, m, d) => collectHolidaySet(y).has(toKey(m, d));
+  const prevDay = new Date(date);
+  prevDay.setDate(prevDay.getDate() - 1);
+  let cursor = new Date(prevDay);
+  let cameFromSundayHoliday = false;
+  // 直前の連続した祝日を遡り、その先頭が日曜日ならcursorの翌日(=date)は振替休日
+  while (isFixedHoliday(cursor.getFullYear(), cursor.getMonth() + 1, cursor.getDate())) {
+    if (cursor.getDay() === 0) cameFromSundayHoliday = true;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  if (cameFromSundayHoliday && date.getDay() !== 0) return true;
+
+  // 国民の休日: 前日・翌日がともに祝日で、当日が日曜でも祝日でもない場合
+  if (date.getDay() !== 0) {
+    const nextDay = new Date(date);
+    nextDay.setDate(nextDay.getDate() + 1);
+    const prevIsHoliday = isFixedHoliday(prevDay.getFullYear(), prevDay.getMonth() + 1, prevDay.getDate());
+    const nextIsHoliday = isFixedHoliday(nextDay.getFullYear(), nextDay.getMonth() + 1, nextDay.getDate());
+    if (prevIsHoliday && nextIsHoliday) return true;
+  }
+
+  return false;
+}
+
+/** 曜日・祝日から既定の運行日区分を推定する(日曜・祝日はHoliday扱い) */
 function defaultDayTypeFromDate(date) {
   const day = date.getDay(); // 0=日,6=土
-  if (day === 0) return "Holiday";
+  if (day === 0 || isJapanesePublicHoliday(date)) return "Holiday";
   if (day === 6) return "Saturday";
   return "weekday";
 }
@@ -524,25 +629,72 @@ function buildDirectTrainsForRoute(rawDirectTrains, routeId) {
   }));
 }
 
-/** 指定系統の上り・下りCSVを取得し、003(直通)の列車も読み替えて合流させ、キャッシュして返す */
-async function loadRouteTrains(routeId) {
-  if (state.trains[routeId]) return state.trains[routeId];
-  const route = ROUTES[routeId];
+/** 2系統(002ファイル)固有の上り・下りを読み込み、キャッシュして返す(路線への割り当て前の生データ)。 */
+async function loadLine2OwnTrainsRaw() {
+  if (state.line2OwnTrainsRaw) return state.line2OwnTrainsRaw;
+  const route2 = ROUTES[2];
   const [downText, upText] = await Promise.all([
-    fetch(route.files.down).then((r) => r.text()),
-    fetch(route.files.up).then((r) => r.text()),
+    fetch(route2.files.down).then((r) => r.text()),
+    fetch(route2.files.up).then((r) => r.text()),
   ]);
   const downParsed = parseCSVText(downText);
   const upParsed = parseCSVText(upText);
-  const fileTag = routeId === 1 ? "001" : "002";
-  const ownTrains = [...buildTrains(downParsed, routeId, fileTag), ...buildTrains(upParsed, routeId, fileTag)];
+  state.line2OwnTrainsRaw = [
+    ...buildTrains(downParsed, 2, "002"),
+    ...buildTrains(upParsed, 2, "002"),
+  ];
+  return state.line2OwnTrainsRaw;
+}
+
+/** 2系統の郡元発着列車(始発または終点が「郡元」の列車)を、1系統画面のI_16(郡元)に
+ *  重ねて表示するための複製を作る。郡元発は下り線、郡元終点は上り線に強制する(directionを上書き)。
+ *  郡元の停車イベント以外は駅コードをそのままにする(=1系統の路線図上ではそこだけ現れる)。
+ *  直通(003)列車は郡元を経由しないため対象外(呼び出し元でline2の固有ファイルのみを渡す)。 */
+function buildKogenPinTrainsForLine1(line2OwnTrains) {
+  const KOGEN_CODE = "I_16";
+  const pins = [];
+  for (const tr of line2OwnTrains) {
+    const lastIdx = tr.stops.length - 1;
+    const isOriginKogen = tr.stops[0].name === "郡元";
+    const isTerminusKogen = !isOriginKogen && tr.stops[lastIdx].name === "郡元";
+    if (!isOriginKogen && !isTerminusKogen) continue;
+    const pinIndex = isOriginKogen ? 0 : lastIdx;
+    pins.push({
+      ...tr,
+      direction: isOriginKogen ? "down" : "up",
+      stops: tr.stops.map((s, i) => (i === pinIndex ? { ...s, code: KOGEN_CODE } : s)),
+    });
+  }
+  return pins;
+}
+
+/** 指定系統の上り・下りCSVを取得し、003(直通)の列車も読み替えて合流させ、キャッシュして返す。
+ *  1系統には加えて、2系統の郡元発着列車をI_16に重ねて表示するための複製も合流させる。 */
+async function loadRouteTrains(routeId) {
+  if (state.trains[routeId]) return state.trains[routeId];
+  const route = ROUTES[routeId];
+
+  const ownTrains = routeId === 2
+    ? await loadLine2OwnTrainsRaw()
+    : await (async () => {
+        const [downText, upText] = await Promise.all([
+          fetch(route.files.down).then((r) => r.text()),
+          fetch(route.files.up).then((r) => r.text()),
+        ]);
+        return [...buildTrains(parseCSVText(downText), 1, "001"), ...buildTrains(parseCSVText(upText), 1, "001")];
+      })();
 
   const rawDirect = await loadDirectTrainsRaw();
   const directTrains = buildDirectTrainsForRoute(rawDirect, routeId);
 
-  const trains = [...ownTrains, ...directTrains];
-  // 下り方向CSVのヘッダ順が「上から下」の正順なので、これを画面表示上の正準順(canonical order)とする
-  const canonicalOrder = downParsed.stations.map((s) => s.code);
+  let trains = [...ownTrains, ...directTrains];
+  if (routeId === 1) {
+    const line2Own = await loadLine2OwnTrainsRaw();
+    trains = [...trains, ...buildKogenPinTrainsForLine1(line2Own)];
+  }
+
+  // 表示中の路線図(route.stations)の並び順を、位置計算の正準順(canonical order)とする
+  const canonicalOrder = route.stations.map((s) => s.code);
   state.trains[routeId] = { trains, canonicalOrder };
   return state.trains[routeId];
 }
@@ -644,12 +796,14 @@ function getLaneX(direction) {
   return direction === "up" ? width / 2 - gap : width / 2 + gap;
 }
 
-/** computeTrainPosition の結果を実際の画面座標{x,y}に変換する */
+/** computeTrainPosition の結果を実際の画面座標{x,y}に変換する。
+ *  上り(direction="up")は駅エリアの上半分(station_area_top ~ ●の直前)、
+ *  下り(direction="down")は下半分(●の直後 ~ station_area_bottom)に停車位置を置く。 */
 function positionToCoordinates(position, direction) {
   const x = getLaneX(direction);
   if (position.type === "station") {
     const anchor = getStationAnchorY(position.stationIndex);
-    const y = direction === "up" ? anchor.top : anchor.bottom;
+    const y = direction === "up" ? anchor.top + LAYOUT.stationTop : anchor.bottom;
     return { x, y };
   }
   const y = getSegmentAnchorY(position.segmentIndex);
@@ -721,19 +875,31 @@ function onRouteCardClicked(routeId) {
 }
 
 /** 駅ブロック1件分のDOMを生成する。
- *  index0(始発)は上側の連結線を、最終駅は下側の連結線を描かず、そこで線が終わって見えるようにする。
+ *  真の終点(isFirst/isLastかつリンクなし)は連結線を描かず、駅の●で線が止まって見えるようにする。
+ *  それ以外の先頭/末尾(2系統画面の天文館通・中郡など)は、線はそのまま伸ばしつつ、
+ *  もう一方の画面へのリンクボタン(topLink/bottomLink)を表示する。
  *  もう一方の系統との共用区間に接する側には、その系統色の線を重ねるための --overlap クラスを付与する。 */
 function createStationBlock(station, index, opts) {
-  const { isFirst, isLast, topOverlap, bottomOverlap } = opts;
+  const { isFirst, isLast, topOverlap, bottomOverlap, topLink, bottomLink } = opts;
+  const isTrueTerminusTop = isFirst && !topLink;
+  const isTrueTerminusBottom = isLast && !bottomLink;
   const wrap = document.createElement("div");
   wrap.className = "station_area";
 
   const top = document.createElement("div");
   top.className = "station_area_top" + (index === 0 ? " js-station-top-anchor" : "") + (topOverlap ? " station_area_top--overlap" : "");
-  top.innerHTML = isFirst ? "" : '<div class="boder"></div>';
+  if (topLink) {
+    top.innerHTML = '<div class="boder"></div>' +
+      `<button type="button" class="edge_link_btn edge_link_btn--top"><i class="fa-solid fa-chevron-up"></i><span>${topLink.label}</span></button>`;
+    top.querySelector(".edge_link_btn").addEventListener("click", topLink.onClick);
+  } else {
+    top.innerHTML = isTrueTerminusTop ? "" : '<div class="boder"></div>';
+  }
 
   const center = document.createElement("div");
-  center.className = "station_center" + (topOverlap || bottomOverlap ? " station_center--overlap" : "");
+  const overlapClass = topOverlap || bottomOverlap ? " station_center--overlap" : "";
+  const terminusClass = (isTrueTerminusTop ? " station_center--terminus-top" : "") + (isTrueTerminusBottom ? " station_center--terminus-bottom" : "");
+  center.className = "station_center" + overlapClass + terminusClass;
   const hasTransfer = Object.prototype.hasOwnProperty.call(TRANSFER_INFO, station.ja);
   center.innerHTML = `
     <div class="boder station_center_line"></div>
@@ -742,8 +908,9 @@ function createStationBlock(station, index, opts) {
         <span>${state.language === "ja" ? station.ja : station.en}</span>
       </div>
       <div class="station_links_row">
-        ${hasTransfer ? `<button type="button" class="station_link_btn" data-link="transfer" title="${t("transferLabel")}"><i class="fa-solid fa-right-left"></i></button>` : ""}
+        ${hasTransfer ? `<button type="button" class="station_link_btn" data-link="transfer" title="${t("transferLabel")}"><i class="fa-solid fa-train-subway"></i></button>` : ""}
         <button type="button" class="station_link_btn" data-link="timetable" title="${t("timetableLabel")}"><i class="fa-regular fa-clock"></i></button>
+        <button type="button" class="station_link_btn" data-link="display" title="${t("displayModeLabel")}"><i class="fa-solid fa-display"></i></button>
       </div>
     </div>
     <div class="station_point_out"><div class="station_point_in"></div></div>
@@ -751,16 +918,24 @@ function createStationBlock(station, index, opts) {
 
   const bottom = document.createElement("div");
   bottom.className = "station_area_bottom" + (index === 0 ? " js-station-bottom-anchor" : "") + (bottomOverlap ? " station_area_bottom--overlap" : "");
-  bottom.innerHTML = isLast ? "" : '<div class="boder"></div>';
+  if (bottomLink) {
+    bottom.innerHTML = '<div class="boder"></div>' +
+      `<button type="button" class="edge_link_btn edge_link_btn--bottom"><i class="fa-solid fa-chevron-down"></i><span>${bottomLink.label}</span></button>`;
+    bottom.querySelector(".edge_link_btn").addEventListener("click", bottomLink.onClick);
+  } else {
+    bottom.innerHTML = isTrueTerminusBottom ? "" : '<div class="boder"></div>';
+  }
 
   wrap.appendChild(top);
   wrap.appendChild(center);
   wrap.appendChild(bottom);
 
   const transferBtn = center.querySelector('.station_link_btn[data-link="transfer"]');
-  transferBtn?.addEventListener("click", () => showTransferMenu(station));
+  transferBtn?.addEventListener("click", (e) => showTransferMenu(station, e.currentTarget));
   const timetableBtn = center.querySelector('.station_link_btn[data-link="timetable"]');
   timetableBtn?.addEventListener("click", (e) => showTimetableMenu(station, e.currentTarget));
+  const displayBtn = center.querySelector('.station_link_btn[data-link="display"]');
+  displayBtn?.addEventListener("click", () => showToast(t("featureComingSoonToast")));
 
   return wrap;
 }
@@ -817,13 +992,34 @@ function renderLineDiagram() {
   body.style.setProperty("--overlay-color", ROUTES[route.otherRouteId].color);
 
   const lastIndex = stations.length - 1;
+  const branchPoints = route.branchPoints || [];
+  const edgeLinks = route.edgeLinks || {};
+
   stations.forEach((station, i) => {
     const prevOverlap = i > 0 && isOverlapSegment(route, stations[i - 1].code, station.code);
     const nextOverlap = i < lastIndex && isOverlapSegment(route, station.code, stations[i + 1].code);
+    const branch = branchPoints.find((bp) => bp.afterCode === station.code);
+    // 分岐帯へ滑らかにつながるよう、分岐直前の駅では●・下側スタブにも重ね線を表示する
+    const bottomOverlapVisual = nextOverlap || !!branch;
+
+    const topLink = i === 0 && edgeLinks.top
+      ? { label: t("backToLine1"), onClick: () => switchView(edgeLinks.top) }
+      : null;
+    const bottomLink = i === lastIndex && edgeLinks.bottom
+      ? { label: t("backToLine1"), onClick: () => switchView(edgeLinks.bottom) }
+      : null;
+
     body.appendChild(
-      createStationBlock(station, i, { isFirst: i === 0, isLast: i === lastIndex, topOverlap: prevOverlap, bottomOverlap: nextOverlap })
+      createStationBlock(station, i, {
+        isFirst: i === 0,
+        isLast: i === lastIndex,
+        topOverlap: prevOverlap,
+        bottomOverlap: bottomOverlapVisual,
+        topLink,
+        bottomLink,
+      })
     );
-    if (i < lastIndex) body.appendChild(createSegmentBlock(nextOverlap, station.code === route.branchAfterCode, route.otherRouteId));
+    if (i < lastIndex) body.appendChild(createSegmentBlock(nextOverlap, !!branch, branch?.otherRouteId));
   });
 
   document.getElementById("directionUpLabel").textContent = t("directionUp")(
@@ -936,9 +1132,14 @@ function openTrainModal(train, anchorEl) {
     })
     .join("");
 
+  // 系統番号が空欄(003ファイルの一部列車)の場合はバッジ自体を表示せず、行き先を一番左に詰める
+  const badgeHtml = train.lineNum
+    ? `<span class="modal_badge" style="--modal-line-color:${color}">${toFullWidthLineNum(train.lineNum)}</span>`
+    : "";
+
   body.innerHTML = `
     <div class="modal_title">
-      <span class="modal_badge" style="--modal-line-color:${color}">${toFullWidthLineNum(train.lineNum) || "-"}</span>
+      ${badgeHtml}
       <span>${train.destination}${state.language === "ja" ? '<span class="modal_title_suffix"> 行</span>' : ""}</span>
     </div>
     <div class="modal_row"><span>${t("modalType")}</span><span>${typeLabel}</span></div>
@@ -951,13 +1152,22 @@ function openTrainModal(train, anchorEl) {
   document.getElementById("trainModal").classList.remove("is-hidden");
   positionModalBubble(anchorEl);
 
+  // 行き先(モーダルの先頭)が常に見えるよう、外側のモーダル本体は必ず一番上までスクロールを戻す。
+  const box = document.getElementById("modalBox");
+  box.scrollTop = 0;
+
   // 開いた直後は、今後最初に到着する(または現在到着中の)駅の行が一覧の一番上に来るようにする。
-  // 終点付近で残りの行が5行に満たない場合は、ブラウザのスクロール上限により自然と
-  // 一番下が終点になる(それ以上は下にスクロールできないため)。
+  // 終点付近で残りの行が5行に満たない場合は、スクロール上限により自然と一番下が終点になる。
+  // (scrollIntoViewは外側のmodal_boxまで巻き込んでスクロールさせてしまい、行き先が隠れることが
+  //  あったため、内側のmodal_station_listだけを対象にscrollTopを直接計算する。)
   const list = document.getElementById("modalStationList");
   const currentRow = list.querySelector(".modal_station_row.is-current");
   const targetRow = currentRow || list.querySelector(".modal_station_row.is-upcoming") || list.lastElementChild;
-  targetRow?.scrollIntoView({ block: "start" });
+  if (targetRow) {
+    const listRect = list.getBoundingClientRect();
+    const rowRect = targetRow.getBoundingClientRect();
+    list.scrollTop += rowRect.top - listRect.top;
+  }
 }
 
 /** 列車情報の吹き出しを、タップされたアイコンの近くに配置する。
@@ -1013,7 +1223,8 @@ function closeStationMenu() {
   stationMenuEl = null;
 }
 
-/** アイコンボタンの近くに小さなメニュー(ボタン一覧)を表示する共通処理 */
+/** アイコンボタンの近くに小さなメニュー(ボタン一覧)を表示する共通処理。
+ *  item.showChevron を立てると、項目の右端に「>」を表示する(クリックして遷移する項目向け)。 */
 function openStationMenu(className, items, anchorEl) {
   closeStationMenu();
   const menu = document.createElement("div");
@@ -1022,7 +1233,7 @@ function openStationMenu(className, items, anchorEl) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "station_menu_item";
-    btn.textContent = item.label;
+    btn.innerHTML = `<span>${item.label}</span>` + (item.showChevron ? '<i class="fa-solid fa-chevron-right"></i>' : "");
     if (item.disabled) btn.disabled = true;
     else btn.addEventListener("click", () => { item.onClick(); closeStationMenu(); });
     menu.appendChild(btn);
@@ -1051,24 +1262,30 @@ document.addEventListener("click", (e) => {
   closeStationMenu();
 });
 
-/** 乗り換えボタンの処理。乗り換え路線が定義されている駅のみボタンが表示される。 */
-function showTransferMenu(station) {
+/** 乗り換えボタンの処理。乗り換え路線が定義されている駅のみボタンが表示される。
+ *  時刻表ボタンと同様、アイコンの近くに一覧を表示する(乗り換え先へのリンクは無いため項目はタップ不可)。 */
+function showTransferMenu(station, anchorEl) {
   const info = TRANSFER_INFO[station.ja];
   if (!info) {
     showToast(t("transferNoInfoToast"));
     return;
   }
   const lines = state.language === "ja" ? info.ja : info.en;
-  showToast(`${t("transferLabel")}: ${lines.join("・")}`);
+  openStationMenu(
+    "station_transfer_menu",
+    lines.map((line) => ({ label: line, disabled: true })),
+    anchorEl
+  );
 }
 
-/** 時刻表ボタンの処理。駅ごとに用意された複数のURLスロットから選んで開く(URL自体は運用担当者が設定)。 */
+/** 時刻表ボタンの処理。駅ごとに用意された複数のURL(系統別など)から選んで開く(URL自体は運用担当者が設定)。 */
 function showTimetableMenu(station, anchorEl) {
-  const urls = timetableUrlsFor(station.ja);
+  const entries = timetableEntriesFor(station.ja);
   openStationMenu(
     "station_timetable_menu",
-    urls.map((url, i) => ({
-      label: t("timetableSlotLabel")(i + 1),
+    entries.map(({ label, url }) => ({
+      label,
+      showChevron: true,
       onClick: () => {
         if (!url) { showToast(t("timetableUrlUnsetToast")); return; }
         window.open(url, "_blank", "noopener");
@@ -1185,6 +1402,14 @@ function togglePlay() {
     startPlaybackTicker();
   }
   updatePlayButtonUI();
+  updateNowButtonVisibility();
+}
+
+/** 「現在時刻に戻す」ボタンの表示/非表示を切り替える。時刻を現在時刻から変更している(手動指定
+ *  または再生中の)ときだけ表示し、実際の現在時刻を追従している間は表示しない。 */
+function updateNowButtonVisibility() {
+  const isDeviatedFromNow = state.manualTime !== null || state.isPlaying;
+  document.getElementById("nowButton").classList.toggle("is-hidden", !isDeviatedFromNow);
 }
 
 /** 運行日セレクトの表示テキストを現在の言語に合わせて更新する */
@@ -1269,6 +1494,7 @@ function onControlPanelChanged() {
   state.dayType = daySelect.value;
   state.manualTime = timeInput.value ? timeToSeconds(timeInput.value + ":00") : null;
   updateTrainMarkers();
+  updateNowButtonVisibility();
 }
 
 /** 「現在時刻に戻す」ボタンの処理。再生・手動指定を解除し、実際の現在時刻・運行日に復帰する。 */
@@ -1284,6 +1510,7 @@ function resetToNow() {
   updatePlayButtonUI();
   startLiveClock();
   updateTrainMarkers();
+  updateNowButtonVisibility();
 }
 
 /* =========================================================
@@ -1333,6 +1560,7 @@ function init() {
   applyTheme();
   applyStaticI18n();
   updatePlayButtonUI();
+  updateNowButtonVisibility();
   renderRouteSelect();
   initEventListeners();
   syncHeaderHeight();

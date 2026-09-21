@@ -254,7 +254,7 @@ button{
   justify-content:center;
   width:34px;
   height:34px;
-  border-radius:8px;
+  border-radius:3px;
   background:var(--route-color,#888);
   color:#fff;
   font-family:var(--badge-font);
@@ -404,10 +404,11 @@ button{
   gap:6px;
 }
 
-.station_timetable_menu{
+.station_timetable_menu,
+.station_transfer_menu{
   position:fixed;
   z-index:2100;
-  min-width:150px;
+  min-width:170px;
   background:var(--modal-bg);
   color:var(--text-color);
   border-radius:10px;
@@ -415,7 +416,10 @@ button{
   box-shadow:var(--shadow);
 }
 .station_menu_item{
-  display:block;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
   width:100%;
   text-align:left;
   border:none;
@@ -426,6 +430,10 @@ button{
   border-radius:6px;
 }
 .station_menu_item:hover{ background:var(--btn-bg-hover); }
+.station_menu_item i.fa-chevron-right{
+  color:var(--muted-text);
+  font-size:11px;
+}
 .station_menu_item[disabled]{
   color:var(--muted-text);
   cursor:not-allowed;
@@ -479,6 +487,36 @@ button{
   background:var(--overlay-color);
   z-index:1;
 }
+
+/* 本当の終点(鹿児島駅前・谷山など、他画面へのリンクを持たない先頭/末尾駅)では、
+   連結線が●を突き抜けて見えないよう、線を●の中心で止める(上半分/下半分のみ描画)。 */
+.station_center--terminus-top .station_center_line{ top:50%; height:50%; }
+.station_center--terminus-bottom .station_center_line{ top:0; height:50%; }
+.station_center--overlap.station_center--terminus-top::before{ top:50%; height:50%; }
+.station_center--overlap.station_center--terminus-bottom::before{ top:0; height:50%; }
+
+/* 2系統画面(天文館通・中郡)の両端など、他画面へのリンクを持つ先頭/末尾駅のスタブ。
+   連結線はそのまま伸ばし、その中央にリンクボタンを重ねる。 */
+.edge_link_btn{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:3;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  border:none;
+  background:var(--station-bg);
+  padding:3px 10px;
+  border-radius:999px;
+  color:var(--overlay-color);
+  font-weight:700;
+  font-size:11px;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.station_area_top .edge_link_btn{ top:4px; }
+.station_area_bottom .edge_link_btn{ bottom:4px; }
 
 /* 駅の●の内側の色はライト/ダークどちらでも常に白 */
 .station_point_in{
@@ -699,7 +737,7 @@ button{
   min-width:30px;
   height:30px;
   padding:0 4px;
-  border-radius:6px;
+  border-radius:3px;
   color:#fff;
   font-family:var(--badge-font);
   font-weight:700;
