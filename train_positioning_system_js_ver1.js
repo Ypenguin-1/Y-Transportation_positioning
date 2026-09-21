@@ -206,7 +206,7 @@ TIMETABLE_URLS.set("鹿児島駅前", [
 
 /** 乗り換え案内(駅名 → 乗り換え路線名の配列)。ここに無い駅は乗り換えボタン自体を表示しない。 */
 const TRANSFER_INFO = {
-  "鹿児島駅前": { ja: ["JR日豊線"], en: ["JR Nippō Line"] },
+  "鹿児島駅前": { ja: ["JR日豊線","JR鹿児島線"], en: ["JR Nippō Line", "JR Kagoshima Line"] },
   "鹿児島中央駅前": { ja: ["JR鹿児島線", "JR日豊線", "JR指宿枕崎線", "高速バス"], en: ["JR Kagoshima Line", "JR Nippō Line", "JR Ibusuki-Makurazaki Line", "Highway bus"] },
   "純心学園前": { ja: ["JR指宿枕崎線(郡元駅)"], en: ["JR Ibusuki-Makurazaki Line (Kogen Sta.)"] },
   "南鹿児島駅前": { ja: ["JR指宿枕崎線"], en: ["JR Ibusuki-Makurazaki Line"] },
