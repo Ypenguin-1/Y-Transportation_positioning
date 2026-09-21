@@ -202,13 +202,12 @@ TIMETABLE_URLS.set("鹿児島駅前", [
   { label: "1系統", url: "https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E9%B9%BF%E5%85%90%E5%B3%B6%E9%A7%85%E5%89%8D&kubun=0&syubetuId=1" },
   { label: "2系統", url: "https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E9%B9%BF%E5%85%90%E5%B3%B6%E9%A7%85%E5%89%8D&kubun=0&syubetuId=1" },
   { label: "その他の列車", url: "https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E9%B9%BF%E5%85%90%E5%B3%B6%E9%A7%85%E5%89%8D&kubun=0&syubetuId=1" },
-],
-                  "桜島桟橋通",[
-                     {label: "1系統", url:"https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E6%A1%9C%E5%B3%B6%E6%A1%9F%E6%A9%8B%E9%80%9A&kubun=0&syubetuId=1"},
-                     {label: "2系統", url:"https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E6%A1%9C%E5%B3%B6%E6%A1%9F%E6%A9%8B%E9%80%9A&kubun=0&syubetuId=1"},
-                     {label: "その他の列車", url:"https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E6%A1%9C%E5%B3%B6%E6%A1%9F%E6%A9%8B%E9%80%9A&kubun=0&syubetuId=1"},
-                     
-                  ]);
+]);
+TIMETABLE_URLS.set("桜島桟橋通",[
+   {label: "1系統", url:"https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E6%A1%9C%E5%B3%B6%E6%A1%9F%E6%A9%8B%E9%80%9A&kubun=0&syubetuId=1"},
+   {label: "2系統", url:"https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E6%A1%9C%E5%B3%B6%E6%A1%9F%E6%A9%8B%E9%80%9A&kubun=0&syubetuId=1"},
+   {label: "その他の列車", url:"https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E6%A1%9C%E5%B3%B6%E6%A1%9F%E6%A9%8B%E9%80%9A&kubun=0&syubetuId=1"},
+]);
 
 
 /** 乗り換え案内(駅名 → 乗り換え路線名の配列)。ここに無い駅は乗り換えボタン自体を表示しない。 */
