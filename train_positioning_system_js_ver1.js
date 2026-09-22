@@ -209,6 +209,177 @@ TIMETABLE_URLS.set("桜島桟橋通", [
    {label: "その他の列車", url: "https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E6%A1%9C%E5%B3%B6%E6%A1%9F%E6%A9%8B%E9%80%9A&kubun=0&syubetuId=1" },
 ]);
 
+TIMETABLE_URLS.set("水族館口", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E6%B0%B4%E6%97%8F%E9%A4%A8%E5%8F%A3&kubun=0&syubetuId=1" },
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E6%B0%B4%E6%97%8F%E9%A4%A8%E5%8F%A3&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E6%B0%B4%E6%97%8F%E9%A4%A8%E5%8F%A3&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("市役所前", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E5%B8%82%E5%BD%B9%E6%89%80%E5%89%8D&kubun=0&syubetuId=1" },
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E5%B8%82%E5%BD%B9%E6%89%80%E5%89%8D&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E5%B8%82%E5%BD%B9%E6%89%80%E5%89%8D&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("朝日通", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E6%9C%9D%E6%97%A5%E9%80%9A&kubun=0&syubetuId=1" },
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E6%9C%9D%E6%97%A5%E9%80%9A&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E6%9C%9D%E6%97%A5%E9%80%9A&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("いづろ通", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E3%81%84%E3%81%A5%E3%82%8D%E9%80%9A&kubun=0&syubetuId=1" },
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E3%81%84%E3%81%A5%E3%82%8D%E9%80%9A&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E3%81%84%E3%81%A5%E3%82%8D%E9%80%9A&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("天文館通", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E5%A4%A9%E6%96%87%E9%A4%A8%E9%80%9A&kubun=0&syubetuId=1" },
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E5%A4%A9%E6%96%87%E9%A4%A8%E9%80%9A&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E5%A4%A9%E6%96%87%E9%A4%A8%E9%80%9A&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("高見馬場", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E9%AB%98%E8%A6%8B%E9%A6%AC%E5%A0%B4&kubun=0&syubetuId=1" },
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E9%AB%98%E8%A6%8B%E9%A6%AC%E5%A0%B4&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E9%AB%98%E8%A6%8B%E9%A6%AC%E5%A0%B4&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("甲東中学校前", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E7%94%B2%E6%9D%B1%E4%B8%AD%E5%AD%A6%E6%A0%A1%E5%89%8D&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("新屋敷", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E6%96%B0%E5%B1%8B%E6%95%B7&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("武之橋", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E6%AD%A6%E4%B9%8B%E6%A9%8B&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("二中通", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E4%BA%8C%E4%B8%AD%E9%80%9A%EF%BC%88%E3%82%AD%E3%83%A9%E3%83%A1%E3%82%AD%E3%83%86%E3%83%A9%E3%82%B9%E5%89%8D%EF%BC%89&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("荒田八幡", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E8%8D%92%E7%94%B0%E5%85%AB%E5%B9%A1&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("騎射場", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E9%A8%8E%E5%B0%84%E5%A0%B4&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("鴨池", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E9%B4%A8%E6%B1%A0&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("郡元", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E9%83%A1%E5%85%83&kubun=0&syubetuId=1" },
+  { label: "2系統", url: "" },
+  { label: "その他の列車", url: "" },
+]);
+
+TIMETABLE_URLS.set("郡元(南側)", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E9%83%A1%E5%85%83%E5%8D%97%E5%81%B4&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E9%83%A1%E5%85%83%E5%8D%97%E5%81%B4&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("涙橋", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E6%B6%99%E6%A9%8B&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E6%B6%99%E6%A9%8B&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("南鹿児島駅前", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E5%8D%97%E9%B9%BF%E5%85%90%E5%B3%B6%E9%A7%85%E5%89%8D&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E5%8D%97%E9%B9%BF%E5%85%90%E5%B3%B6%E9%A7%85%E5%89%8D&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("二軒茶屋", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E4%BA%8C%E8%BB%92%E8%8C%B6%E5%B1%8B&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E4%BA%8C%E8%BB%92%E8%8C%B6%E5%B1%8B&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("宇宿一丁目", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E5%AE%87%E5%AE%BF%E4%B8%80%E4%B8%81%E7%9B%AE&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E5%AE%87%E5%AE%BF%E4%B8%80%E4%B8%81%E7%9B%AE&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("脇田", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E8%84%87%E7%94%B0&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E8%84%87%E7%94%B0&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("笹貫", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E7%AC%B9%E8%B2%AB&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E7%AC%B9%E8%B2%AB&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("上塩屋", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E4%B8%8A%E5%A1%A9%E5%B1%8B&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E4%B8%8A%E5%A1%A9%E5%B1%8B&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("谷山", [
+  { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E8%B0%B7%E5%B1%B1&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E8%B0%B7%E5%B1%B1&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("加治屋町", [
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E5%8A%A0%E6%B2%BB%E5%B1%8B%E7%94%BA&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E5%8A%A0%E6%B2%BB%E5%B1%8B%E7%94%BA&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("高見橋", [
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E9%AB%98%E8%A6%8B%E6%A9%8B&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E9%AB%98%E8%A6%8B%E6%A9%8B&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("鹿児島中央駅前", [
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E9%B9%BF%E5%85%90%E5%B3%B6%E4%B8%AD%E5%A4%AE%E9%A7%85%E5%89%8D&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E9%B9%BF%E5%85%90%E5%B3%B6%E4%B8%AD%E5%A4%AE%E9%A7%85%E5%89%8D&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("都通", [
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E9%83%BD%E9%80%9A&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E9%83%BD%E9%80%9A&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("中州通", [
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E4%B8%AD%E6%B4%B2%E9%80%9A&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E4%B8%AD%E6%B4%B2%E9%80%9A&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("市立病院前", [
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E5%B8%82%E7%AB%8B%E7%97%85%E9%99%A2%E5%89%8D&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E5%B8%82%E7%AB%8B%E7%97%85%E9%99%A2%E5%89%8D&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("神田(交通局前)", [
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E7%A5%9E%E7%94%B0%EF%BC%88%E4%BA%A4%E9%80%9A%E5%B1%80%E5%89%8D%EF%BC%89&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E7%A5%9E%E7%94%B0%EF%BC%88%E4%BA%A4%E9%80%9A%E5%B1%80%E5%89%8D%EF%BC%89&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("唐湊", [
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E5%94%90%E6%B9%8A%EF%BC%88%E5%B0%8F%E7%89%A7%E5%BB%BA%E8%A8%AD%E5%89%8D%EF%BC%89&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E5%94%90%E6%B9%8A%EF%BC%88%E5%B0%8F%E7%89%A7%E5%BB%BA%E8%A8%AD%E5%89%8D%EF%BC%89&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("工学部前", [
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E5%B7%A5%E5%AD%A6%E9%83%A8%E5%89%8D&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E5%B7%A5%E5%AD%A6%E9%83%A8%E5%89%8D&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("純心学園前", [
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E7%B4%94%E5%BF%83%E5%AD%A6%E5%9C%92%E5%89%8D&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E7%B4%94%E5%BF%83%E5%AD%A6%E5%9C%92%E5%89%8D&kubun=0&syubetuId=1" },
+]);
+
+TIMETABLE_URLS.set("中郡", [
+  { label: "2系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E4%B8%AD%E9%83%A1&kubun=0&syubetuId=1" },
+  { label: "その他の列車", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1860,1861&name=%E4%B8%AD%E9%83%A1&kubun=0&syubetuId=1" },
+]);
+
+
 
 /** 乗り換え案内(駅名 → 乗り換え路線名の配列)。ここに無い駅は乗り換えボタン自体を表示しない。 */
 const TRANSFER_INFO = {
