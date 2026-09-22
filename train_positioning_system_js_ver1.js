@@ -275,8 +275,7 @@ TIMETABLE_URLS.set("鴨池", [
 
 TIMETABLE_URLS.set("郡元", [
   { label: "1系統", url: " https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1820,1821&name=%E9%83%A1%E5%85%83&kubun=0&syubetuId=1" },
-  { label: "2系統", url: "" },
-  { label: "その他の列車", url: "" },
+  { label: "2系統", url: "https://www.kotsu-city-kagoshima.jp/wp/timesearch/time_table.php?rosenId=1840,1841&name=%E9%83%A1%E5%85%83&kubun=0&syubetuId=1" },
 ]);
 
 TIMETABLE_URLS.set("郡元(南側)", [
