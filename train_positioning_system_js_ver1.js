@@ -668,8 +668,22 @@ function buildKogenPinTrainsForLine1(line2OwnTrains) {
   return pins;
 }
 
+/** 共用トランク区間(鹿児島駅前～高見馬場)の駅名 → 1系統の駅コード(I_01～I_08)対応表。
+ *  2系統固有の駅名(加治屋町～中郡・郡元)はここに含めない(=郡元はKOGEN専用のpinで別途扱う)。 */
+const LINE1_TRUNK_NAME_TO_CODE = buildNameToCodeMap(LINE1_STATIONS.slice(0, 8));
+
+/** 2系統自身の列車を、共用トランク区間(鹿児島駅前～高見馬場)に限って1系統の駅コードへ読み替える。
+ *  トランクより先(加治屋町～中郡・郡元)は駅名が一致せずそのまま(=非表示)になる。
+ *  実際の上り/下りはそのまま使う(郡元固有のpin(buildKogenPinTrainsForLine1)とは別扱い)。 */
+function buildLine2TrunkTrainsForLine1(line2OwnTrains) {
+  return line2OwnTrains.map((tr) => ({
+    ...tr,
+    stops: remapStopsToRoute(tr.stops, LINE1_TRUNK_NAME_TO_CODE),
+  }));
+}
+
 /** 指定系統の上り・下りCSVを取得し、003(直通)の列車も読み替えて合流させ、キャッシュして返す。
- *  1系統には加えて、2系統の郡元発着列車をI_16に重ねて表示するための複製も合流させる。 */
+ *  1系統には加えて、2系統自身の列車も(共用トランク区間はそのまま、郡元発着はI_16へのpinとして)合流させる。 */
 async function loadRouteTrains(routeId) {
   if (state.trains[routeId]) return state.trains[routeId];
   const route = ROUTES[routeId];
@@ -690,7 +704,7 @@ async function loadRouteTrains(routeId) {
   let trains = [...ownTrains, ...directTrains];
   if (routeId === 1) {
     const line2Own = await loadLine2OwnTrainsRaw();
-    trains = [...trains, ...buildKogenPinTrainsForLine1(line2Own)];
+    trains = [...trains, ...buildKogenPinTrainsForLine1(line2Own), ...buildLine2TrunkTrainsForLine1(line2Own)];
   }
 
   // 表示中の路線図(route.stations)の並び順を、位置計算の正準順(canonical order)とする
